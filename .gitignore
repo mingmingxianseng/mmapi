@@ -1,0 +1,5 @@
+vendor/
+project/
+index.php
+cli-config.php
+bootstrap.php

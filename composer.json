@@ -1,0 +1,26 @@
+{
+    "name": "mmxs/mmapi",
+    "description": "frameworkphp",
+    "authors": [
+        {
+            "name": "chenmingming",
+            "email": "mingming0929@139.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.2",
+        "doctrine/orm": "^2.5",
+        "symfony/yaml": "2.*",
+        "symfony/symfony": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "mmapi\\": [
+                "src/"
+            ]
+        }
+    }
+}
