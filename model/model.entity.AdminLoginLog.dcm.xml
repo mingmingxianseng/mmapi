@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="model\entity\AdminLoginLog" table="admin_login_log">
+    <id name="id" type="integer" column="id">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="masterId" type="integer" column="master_id" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="comment">管理员id</option>
+      </options>
+    </field>
+    <field name="nickName" type="string" column="nick_name" length="60" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="comment">管理员昵称</option>
+      </options>
+    </field>
+    <field name="ip" type="string" column="ip" length="16" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="comment">登录ip</option>
+      </options>
+    </field>
+    <field name="ext" type="text" column="ext" length="65535" nullable="true">
+      <options>
+        <option name="fixed"/>
+        <option name="comment">其他信息</option>
+      </options>
+    </field>
+    <field name="addTime" type="datetime" column="add_time" nullable="false">
+      <options>
+        <option name="comment">添加时间</option>
+      </options>
+    </field>
+  </entity>
+</doctrine-mapping>

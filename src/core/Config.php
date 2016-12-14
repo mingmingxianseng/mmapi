@@ -21,7 +21,12 @@ class Config
      */
     static public function set($key, $value)
     {
-        self::$__config[strtoupper($key)] = $value;
+        $key = strtoupper($key);
+        if (is_array($value) && isset(self::$__config[$key]) &&  is_array(self::$__config[$key])) {
+            self::$__config[$key] = array_merge(self::$__config[$key], $value);
+        } else {
+            self::$__config[$key] = $value;
+        }
     }
 
     /**
@@ -32,7 +37,9 @@ class Config
      */
     static public function batchSet($config)
     {
-        self::$__config = array_merge(self::$__config, array_change_key_case($config, CASE_UPPER));
+        foreach ($config as $k => $v) {
+            self::set($k, $v);
+        }
     }
 
     /**

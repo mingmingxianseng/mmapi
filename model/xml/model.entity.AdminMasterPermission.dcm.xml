@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="model\entity\AdminMasterPermission" table="admin_master_permission">
+    <indexes>
+      <index name="f_master_id" columns="master_id"/>
+      <index name="type" columns="master_id"/>
+    </indexes>
+    <id name="id" type="integer" column="id">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="permissionId" type="string" column="permission_id" length="50" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="comment">权限key</option>
+      </options>
+    </field>
+    <field name="masterId" type="integer" column="master_id" nullable="false">
+      <options>
+        <option name="unsigned">1</option>
+        <option name="comment">用户id</option>
+      </options>
+    </field>
+    <field name="type" type="string" column="type" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="comment">权限类型：group：管理员组 master：管理员</option>
+        <option name="default">master</option>
+      </options>
+    </field>
+    <field name="group" type="string" column="group" length="20" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="comment">权限分组名称</option>
+        <option name="default">admin</option>
+      </options>
+    </field>
+    <field name="addTime" type="datetime" column="add_time" nullable="false">
+      <options>
+        <option name="comment">添加时间</option>
+      </options>
+    </field>
+  </entity>
+</doctrine-mapping>

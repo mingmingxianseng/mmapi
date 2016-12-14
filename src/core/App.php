@@ -30,7 +30,7 @@ class  App
             throw new AppException("VPATH can't be empty!", 'VPATH_EMPTY');
         }
         define('VPATH', Config::get('vpath'));
-        
+
         self::init();
         Dispatcher::dispatch();
     }
@@ -56,24 +56,20 @@ class  App
         $default_conf_path = dirname(__DIR__) . '/convention.php';
         is_file($default_conf_path) && Config::batchSet(include $default_conf_path);
         //加载配置文件
-        $conf_path = Config::get('CONF_PATH') ?: VPATH . '/Conf';
+        $conf_path = Config::get('conf_path', VPATH . '/conf');
         define('CONF_PATH', $conf_path);
 
-        $conf_file = CONF_PATH . '/conf.php';
+        $conf_file = Config::get('conf_file', 'conf.php');
+        $conf_file = CONF_PATH . '/' . $conf_file;
         is_file($conf_file) and Config::batchSet(include $conf_file);
 
-        if (DEBUG) {
-            $conf_file = CONF_PATH . '/debug.php';
-            is_file($conf_file) and Config::batchSet(include $conf_file);
-        }
-
-        $file_load = ' [文件加载：' . count(get_included_files()) . ']';
+        $file_load = ' [File loaded：' . count(get_included_files()) . ']';
         $server    = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '0.0.0.0';
         $remote    = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
         $method    = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI';
 
-        $info = __URL__ . "\r\n{$server}\t{$remote}\t{$method}\t$file_load \r\n";
-        Log::info($info);
+        $info = __URL__ . "\t{$server}\t{$remote}\t{$method}\t$file_load";
+        Log::write($info);
     }
 
     /**
@@ -120,6 +116,7 @@ class  App
      */
     static public function appError($errno, $errstr, $errfile, $errline)
     {
+        Log::error("[{$errno}] $errstr \r\n #{$errfile} +{$errline}");
     }
 
 }

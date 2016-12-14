@@ -1,0 +1,145 @@
+model\entity\AdminMaster:
+    type: entity
+    table: admin_master
+    indexes:
+        fid_groupid:
+            columns:
+                - group_id
+        nick_name:
+            columns:
+                - nick_name
+    uniqueConstraints:
+        user_name:
+            columns:
+                - user_name
+        phone:
+            columns:
+                - phone
+        email:
+            columns:
+                - email
+    id:
+        id:
+            type: integer
+            nullable: false
+            options:
+                unsigned: true
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        groupId:
+            type: smallint
+            nullable: false
+            options:
+                unsigned: false
+                default: '0'
+            column: group_id
+        email:
+            type: string
+            nullable: true
+            length: 255
+            options:
+                fixed: false
+                comment: 用户邮箱
+        phone:
+            type: string
+            nullable: false
+            length: 11
+            options:
+                fixed: true
+                comment: 手机号码
+                default: ''
+        userFace:
+            type: string
+            nullable: false
+            length: 255
+            options:
+                fixed: false
+                comment: 用户头像
+                default: ''
+            column: user_face
+        userName:
+            type: string
+            nullable: false
+            length: 32
+            options:
+                fixed: false
+            column: user_name
+        nickName:
+            type: string
+            nullable: false
+            length: 20
+            options:
+                fixed: false
+            column: nick_name
+        password:
+            type: string
+            nullable: false
+            length: 32
+            options:
+                fixed: true
+                default: ''
+        salt:
+            type: string
+            nullable: false
+            length: 6
+            options:
+                fixed: true
+                default: ''
+        lastLoginTime:
+            type: datetime
+            nullable: false
+            column: last_login_time
+        lastLoginIp:
+            type: string
+            nullable: false
+            length: 16
+            options:
+                fixed: true
+                default: ''
+            column: last_login_ip
+        lastIpAddr:
+            type: string
+            nullable: false
+            length: 50
+            options:
+                fixed: false
+                comment: ip所在地
+                default: ''
+            column: last_ip_addr
+        guid:
+            type: string
+            nullable: false
+            length: 32
+            options:
+                fixed: false
+                comment: 登录唯一标识
+                default: ''
+        from:
+            type: string
+            nullable: false
+            length: 50
+            options:
+                fixed: false
+                comment: 来源
+                default: ''
+        isLock:
+            type: boolean
+            nullable: false
+            options:
+                comment: '状态 0 ：正常 1：锁定'
+                default: '1'
+            column: is_lock
+        updateTime:
+            type: datetime
+            nullable: false
+            options:
+                comment: 更新时间
+                default: CURRENT_TIMESTAMP
+            column: update_time
+        addTime:
+            type: datetime
+            nullable: false
+            column: add_time
+    lifecycleCallbacks: {  }

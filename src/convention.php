@@ -32,9 +32,16 @@ return [
         'data_compress' => false,
     ],
     'log'              => [
+        //开关
+        'status'      => true,
+        //时间格式
         'time_format' => ' c ',
-        'file_size'   => 2097152,
-        'path'        => VPATH,
-        'apart_level' => [],
+        //日志未知
+        'filepath'    => VPATH . '/log.txt',
+        //日志记录类型
+        'level'       => ['log', 'error', 'info', 'sql', 'notice', 'alert'],
+        //是否转码gbk
+        'togbk'       => true,
+        'suffix'      => REQUEST_ID,
     ],
 ];

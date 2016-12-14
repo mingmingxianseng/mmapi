@@ -12,9 +12,9 @@ abstract class Api
 {
 
     //接口请求开始时间
-    private $_start_time;
+    protected $_start_time;
     //参数定义
-    private $options = [
+    protected $options = [
         'debug'            => false,
         'format_to_string' => true,
         'default_code'     => 'SUCCESS',
@@ -59,6 +59,7 @@ abstract class Api
     {
         foreach ($this->params as $param) {
             $param->parse();
+            $this->setField($param->getKey(), $param->getValue());
         }
     }
 
@@ -68,10 +69,14 @@ abstract class Api
      *
      * @param AppException $e
      */
-    public function exceptionHandler(AppException $e)
+    public function exceptionHandler(\Exception $e)
     {
-        $errno = method_exists($e, 'getErrno') ? $e->getErrno() : $e->getCode();
+        $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
 
+        if ($this->options['debug']) {
+            $this->set('exception', get_class($e));
+            $this->set('trace', explode("\n", $e->getTraceAsString()));
+        }
         $this->set('code', $errno)
             ->set('msg', $e->getMessage())
             ->send();
@@ -81,16 +86,49 @@ abstract class Api
      * @desc   setParams 设置参数
      * @author chenmingming
      *
-     * @param ApiParams $param 参数
+     * @param ApiParams|string $param 参数
      *
-     * @return $this
+     * @return ApiParams
      */
-    final public function addParam(ApiParams $param)
+    final public function addParam($param)
     {
-        $param->parse();
-        $this->setField($param->getKey(), $param->getValue());
+        if ($param instanceof ApiParams) {
+            $this->params[$param->getKey()] = $param;
+        } else {
+            $this->params[$param] = ApiParams::create($param);
+        }
 
-        return $this;
+        return $this->params[$param];
+    }
+
+    /**
+     * @desc   get 获取参数
+     * @author chenmingming
+     *
+     * @param string $key 参数名称
+     *
+     * @return ApiParams|null
+     */
+    final public function get($key)
+    {
+        if (isset($this->params[$key])) {
+            return $this->params[$key];
+        }
+
+        return null;
+    }
+
+    /**
+     * @desc   addParams 批量添加
+     * @author chenmingming
+     *
+     * @param array $params 参数列表
+     */
+    final public function addParams(array $params)
+    {
+        foreach ($params as $param) {
+            $this->addParam($param);
+        }
     }
 
     /**

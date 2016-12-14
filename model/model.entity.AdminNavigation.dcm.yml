@@ -1,0 +1,84 @@
+model\entity\AdminNavigation:
+    type: entity
+    table: admin_navigation
+    indexes:
+        pid:
+            columns:
+                - pid
+    id:
+        id:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        pid:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+                comment: 父ID
+                default: '0'
+        icon:
+            type: string
+            nullable: false
+            length: 255
+            options:
+                fixed: false
+                default: ''
+        text:
+            type: string
+            nullable: false
+            length: 20
+            options:
+                fixed: false
+        url:
+            type: string
+            nullable: false
+            length: 255
+            options:
+                fixed: false
+                comment: url地址或者state
+                default: ''
+        group:
+            type: string
+            nullable: false
+            length: 255
+            options:
+                fixed: false
+                comment: 分组
+                default: ''
+        orderNum:
+            type: smallint
+            nullable: false
+            options:
+                unsigned: false
+                comment: 排序
+                default: '99'
+            column: order_num
+        target:
+            type: string
+            nullable: false
+            length: null
+            options:
+                fixed: false
+                comment: '_self:当前窗口打开 _blank:新窗口'
+                default: _self
+        status:
+            type: string
+            nullable: false
+            length: null
+            options:
+                fixed: false
+                comment: '状态 open：开启 close：禁用'
+                default: open
+        addTime:
+            type: datetime
+            nullable: false
+            options:
+                comment: 添加时间
+            column: add_time
+    lifecycleCallbacks: {  }

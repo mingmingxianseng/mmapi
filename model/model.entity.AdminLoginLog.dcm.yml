@@ -1,0 +1,49 @@
+model\entity\AdminLoginLog:
+    type: entity
+    table: admin_login_log
+    id:
+        id:
+            type: integer
+            nullable: false
+            options:
+                unsigned: true
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        masterId:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+                comment: 管理员id
+            column: master_id
+        nickName:
+            type: string
+            nullable: false
+            length: 60
+            options:
+                fixed: false
+                comment: 管理员昵称
+            column: nick_name
+        ip:
+            type: string
+            nullable: false
+            length: 16
+            options:
+                fixed: false
+                comment: 登录ip
+        ext:
+            type: text
+            nullable: true
+            length: 65535
+            options:
+                fixed: false
+                comment: 其他信息
+        addTime:
+            type: datetime
+            nullable: false
+            options:
+                comment: 添加时间
+            column: add_time
+    lifecycleCallbacks: {  }

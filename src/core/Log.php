@@ -83,6 +83,9 @@ class Log
      */
     public static function record($msg, $type = 'log')
     {
+        if (self::$config['status'] === false) {
+            return;
+        }
         self::$log[$type][] = $msg;
     }
 
@@ -120,7 +123,7 @@ class Log
                     }
                 }
             }
-            $result       = self::$driver->save($log);
+            $result = self::$driver->save($log);
             if ($result) {
                 self::$log = [];
             }

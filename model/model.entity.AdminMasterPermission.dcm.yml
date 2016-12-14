@@ -1,0 +1,58 @@
+model\entity\AdminMasterPermission:
+    type: entity
+    table: admin_master_permission
+    indexes:
+        f_master_id:
+            columns:
+                - master_id
+        type:
+            columns:
+                - master_id
+    id:
+        id:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        permissionId:
+            type: string
+            nullable: false
+            length: 50
+            options:
+                fixed: false
+                comment: 权限key
+            column: permission_id
+        masterId:
+            type: integer
+            nullable: false
+            options:
+                unsigned: true
+                comment: 用户id
+            column: master_id
+        type:
+            type: string
+            nullable: false
+            length: null
+            options:
+                fixed: false
+                comment: '权限类型：group：管理员组 master：管理员'
+                default: master
+        group:
+            type: string
+            nullable: false
+            length: 20
+            options:
+                fixed: false
+                comment: 权限分组名称
+                default: admin
+        addTime:
+            type: datetime
+            nullable: false
+            options:
+                comment: 添加时间
+            column: add_time
+    lifecycleCallbacks: {  }

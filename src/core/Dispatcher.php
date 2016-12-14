@@ -8,8 +8,6 @@
 
 namespace mmapi\core;
 
-use Symfony\Component\Config\Definition\Exception\Exception;
-
 class Dispatcher
 {
     /**
@@ -19,8 +17,8 @@ class Dispatcher
     static public function dispatch()
     {
         defined('APP_PATH') || define('APP_PATH', Config::get('app_path'));
-        $layer  = Config::get('dispatcher.layer');
-        $action = $_GET[$layer] ?: Config::get('dispatcher.default_action', '');
+        $layer  = Config::get('dispatcher.layer', 's');
+        $action = isset($_GET[$layer]) ? $_GET[$layer] : Config::get('dispatcher.default_action', '');
 
         $class = str_replace('/', '\\', $action);
         if ($namespace = Config::get('dispatcher.namespace', '')) {

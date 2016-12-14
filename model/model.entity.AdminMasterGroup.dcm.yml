@@ -1,0 +1,39 @@
+model\entity\AdminMasterGroup:
+    type: entity
+    table: admin_master_group
+    uniqueConstraints:
+        name:
+            columns:
+                - name
+    id:
+        id:
+            type: smallint
+            nullable: false
+            options:
+                unsigned: false
+                comment: 分组id
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: false
+            length: 20
+            options:
+                fixed: false
+                comment: 分组名称
+                default: ''
+        gNavigation:
+            type: text
+            nullable: false
+            length: 65535
+            options:
+                fixed: false
+                comment: 该用户组的能看到的导航
+            column: g_navigation
+        addTime:
+            type: datetime
+            nullable: false
+            column: add_time
+    lifecycleCallbacks: {  }

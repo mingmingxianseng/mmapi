@@ -17,10 +17,17 @@ namespace mmapi\log;
 class File
 {
     protected $config = [
+        //开关
+        'status'      => true,
+        //时间格式
         'time_format' => ' c ',
-        'file_size'   => 2097152,
-        'filepath'    => '',
-        'apart_level' => [],
+        //日志未知
+        'filepath'    => VPATH . '/log.txt',
+        //日志记录类型
+        'level'       => ['log', 'error', 'info', 'sql', 'notice', 'alert'],
+        //是否转码gbk
+        'togbk'       => true,
+        'suffix'      => '',
     ];
 
     // 实例化并传入参数
@@ -54,6 +61,9 @@ class File
                 $level .= '[ ' . $type . ' ] ' . $msg . "\r\n";
             }
             $info .= $level;
+        }
+        if ($this->config['togbk']) {
+            $info = iconv('UTF-8', 'GB18030', $info);
         }
 
         return error_log("[{$now}] {$this->config['suffix']} \t{$info}", 3, $destination);
