@@ -127,17 +127,42 @@ class Response
      *
      * @access public
      *
-     * @param string $key   key
-     * @param mixed  $value 值
+     * @param string $key            key
+     * @param mixed  $value          值
+     * @param bool   $formatToString 是否格式化成字符串
      *
      * @return $this
      */
-    public function set($key, $value)
+    public function set($key, $value, $formatToString = false)
     {
 
-        is_null($value) || $this->data[$key] = $value;
+        is_null($value)
+        ||
+        $this->data[$key] = $formatToString ? $this->formatToString($value) : $value;
 
         return $this;
+    }
+
+    /**
+     * @desc   formatToString 所有类型数据格式化成字符串
+     * @author chenmingming
+     *
+     * @param mixed $value 待格式化数据
+     *
+     * @return array|string
+     */
+    private function formatToString($value)
+    {
+        if (is_array($value)) {
+            $tmp = [];
+            foreach ($value as $k => $v) {
+                $tmp[$k] = $this->formatToString($v);
+            }
+
+            return $tmp;
+        } elseif (!is_bool($value)) {
+            return (string)$value;
+        }
     }
 
     /**

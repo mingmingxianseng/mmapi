@@ -32,6 +32,7 @@ class  App
         define('VPATH', Config::get('vpath'));
         
         self::init();
+        Dispatcher::dispatch();
     }
 
     /**

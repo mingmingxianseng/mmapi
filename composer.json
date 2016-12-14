@@ -8,10 +8,7 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "^6.2",
-        "doctrine/orm": "^2.5",
-        "symfony/yaml": "2.*",
-        "symfony/symfony": "*"
+        "doctrine/orm": "^2.5"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
@@ -20,6 +17,9 @@
         "psr-4": {
             "mmapi\\": [
                 "src/"
+            ],
+            "app\\": [
+                "app/"
             ]
         }
     }

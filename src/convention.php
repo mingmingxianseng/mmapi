@@ -16,6 +16,12 @@ return [
         ],
         'options'        => [],
     ],
+    //路由配置
+    'dispatcher'       => [
+        'layer'          => 's',
+        'default_action' => 'index',
+        'namespace'      => 'app',
+    ],
     'error_reportiong' => '',
     'cache'            => [
         'type'          => 'file',
