@@ -37,14 +37,25 @@ abstract class Api
      */
     abstract public function run();
 
+    final public function main()
+    {
+        try {
+            $this->run();
+            $this->send();
+        } catch (\Exception $e) {
+            $this->exceptionHandler($e);
+            throw $e;
+        }
+
+    }
+
     /**
      * FrontApi constructor. 构造函数
      */
     public function __construct()
     {
         $this->_start_time = microtime(true);
-        set_exception_handler([$this, 'exceptionHandler']);
-        $this->options = array_merge($this->options, Config::get('api', []));
+        $this->options     = array_merge($this->options, Config::get('api', []));
         $this->init();
         $this->parse();
         $this->set('code', $this->options['default_code']);
@@ -74,8 +85,10 @@ abstract class Api
         $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
 
         if ($this->options['debug']) {
-            $this->set('exception', get_class($e));
-            $this->set('trace', explode("\n", $e->getTraceAsString()));
+            $this->set('exception', get_class($e))
+                ->set('trace', explode("\n", $e->getTraceAsString()));
+            method_exists($e, 'getDetail') && $this->set('detail', $e->getDetail());
+
         }
         $this->set('code', $errno)
             ->set('msg', $e->getMessage())
@@ -168,7 +181,7 @@ abstract class Api
      */
     final protected function set($key, $value)
     {
-        Response::create()->set($key, $value, $this->options['format_to_string']);
+        Response::create()->set($key, $value, $this->options['format_to_string'] == true);
 
         return $this;
     }
@@ -187,7 +200,7 @@ abstract class Api
      * @author chenmingming
      *
      */
-    final protected function send()
+    final private function send()
     {
         $this->options['debug'] && $this->calcost();
         $this->beforeRespnse();
@@ -227,5 +240,23 @@ abstract class Api
     public function option($key, $value)
     {
         $this->options[$key] = $value;
+    }
+
+    /**
+     * @desc   __get 获取值
+     * @author chenmingming
+     *
+     * @param $key
+     *
+     * @return mixed|null
+     */
+    public function __get($key)
+    {
+        $apiParam = $this->get($key);
+        if (is_null($apiParam)) {
+            return null;
+        }
+
+        return $apiParam->getValue();
     }
 }

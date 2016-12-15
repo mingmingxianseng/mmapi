@@ -35,7 +35,11 @@ class SqlLog implements SQLLogger
     {
         self::$num++;
         $this->start_time = microtime(true);
-        null === $params || $sql .= "\r\nParams:\r\n" . var_export($this->normalizeParams($params), true);
+//        null === $params || $sql .= "\r\nParams:\r\n" . var_export($this->normalizeParams($params), true);
+        if (null !== $params) {
+            $sql = str_replace('?', '"%s"', $sql);
+            $sql = vsprintf($sql, $this->normalizeParams($params));
+        }
         Log::sql($sql);
     }
 

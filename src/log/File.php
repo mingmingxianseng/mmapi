@@ -16,6 +16,14 @@ namespace mmapi\log;
  */
 class File
 {
+    const COLOR_RIGHT = "\033[1;40;35m";
+    const COLOR_RED = "\033[1;40;31m";
+    const COLOR_COMMON = "\033[1;40;33m";
+    const COLOR_GREEN = "\033[40;32m";
+    const COLOR_BLUE = "\033[1;40;36m";
+    const COLOR_GREY = "\033[1;40;30m";
+    const COLOR_END = "\033[0m";
+
     protected $config = [
         //开关
         'status'      => true,
@@ -28,6 +36,10 @@ class File
         //是否转码gbk
         'togbk'       => true,
         'suffix'      => '',
+        'color'       => [
+            'sql'   => self::COLOR_GREY,
+            'error' => self::COLOR_RED,
+        ],
     ];
 
     // 实例化并传入参数
@@ -54,11 +66,15 @@ class File
         $info        = '';
         foreach ($log as $type => $val) {
             $level = '';
+
             foreach ($val as $msg) {
                 if (!is_string($msg)) {
                     $msg = var_export($msg, true);
                 }
                 $level .= '[ ' . $type . ' ] ' . $msg . "\r\n";
+            }
+            if (isset($this->config['color'][$type])) {
+                $level = $this->config['color'][$type] . $level . self::COLOR_END;
             }
             $info .= $level;
         }

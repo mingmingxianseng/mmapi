@@ -61,13 +61,15 @@
         <option name="default">wait</option>
       </options>
     </field>
-    <field name="lastTime" type="datetime" column="last_time" nullable="false">
+    <field name="lastTime" type="string" column="last_time" nullable="false">
       <options>
+        <option name="fixed"/>
         <option name="comment">最后一次执行的时间</option>
       </options>
     </field>
-    <field name="addTime" type="datetime" column="add_time" nullable="false">
+    <field name="addTime" type="string" column="add_time" nullable="false">
       <options>
+        <option name="fixed"/>
         <option name="comment">添加时间</option>
       </options>
     </field>

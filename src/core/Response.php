@@ -135,7 +135,6 @@ class Response
      */
     public function set($key, $value, $formatToString = false)
     {
-
         is_null($value)
         ||
         $this->data[$key] = $formatToString ? $this->formatToString($value) : $value;
@@ -163,6 +162,8 @@ class Response
         } elseif (!is_bool($value)) {
             return (string)$value;
         }
+
+        return $value;
     }
 
     /**

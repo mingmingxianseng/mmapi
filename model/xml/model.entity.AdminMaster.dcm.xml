@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-  <entity name="model\entity\AdminMaster" table="admin_master">
+  <entity name="model\entity\AdminMaster" table="admin_master" repository-class="model\repository\AdminMasterRepository">
     <indexes>
       <index name="fid_groupid" columns="group_id"/>
       <index name="nick_name" columns="nick_name"/>
@@ -61,7 +61,11 @@
         <option name="default"/>
       </options>
     </field>
-    <field name="lastLoginTime" type="datetime" column="last_login_time" nullable="false"/>
+    <field name="lastLoginTime" type="string" column="last_login_time" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
     <field name="lastLoginIp" type="string" column="last_login_ip" length="16" nullable="false">
       <options>
         <option name="fixed">1</option>
@@ -101,6 +105,10 @@
         <option name="default">CURRENT_TIMESTAMP</option>
       </options>
     </field>
-    <field name="addTime" type="datetime" column="add_time" nullable="false"/>
+    <field name="addTime" type="string" column="add_time" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
   </entity>
 </doctrine-mapping>

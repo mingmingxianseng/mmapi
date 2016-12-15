@@ -1,7 +1,7 @@
 .idea/
+model/
 vendor/
 project/
 cli-config.php
 bootstrap.php
-*.php~cd
-model/
+*.php~

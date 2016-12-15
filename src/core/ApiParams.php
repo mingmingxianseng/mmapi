@@ -388,4 +388,14 @@ class ApiParams
     {
         $api->addParam($this);
     }
+
+    /**
+     * @desc   __toString
+     * @author chenmingming
+     * @return mixed
+     */
+    public function __toString()
+    {
+        return $this->value;
+    }
 }

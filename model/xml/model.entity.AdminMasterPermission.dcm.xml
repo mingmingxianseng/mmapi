@@ -4,29 +4,11 @@
     <indexes>
       <index name="f_master_id" columns="master_id"/>
       <index name="type" columns="master_id"/>
+      <index name="fidx_permission_id" columns="permission_id"/>
     </indexes>
     <id name="id" type="integer" column="id">
       <generator strategy="IDENTITY"/>
     </id>
-    <field name="permissionId" type="string" column="permission_id" length="50" nullable="false">
-      <options>
-        <option name="fixed"/>
-        <option name="comment">权限key</option>
-      </options>
-    </field>
-    <field name="masterId" type="integer" column="master_id" nullable="false">
-      <options>
-        <option name="unsigned">1</option>
-        <option name="comment">用户id</option>
-      </options>
-    </field>
-    <field name="type" type="string" column="type" nullable="false">
-      <options>
-        <option name="fixed"/>
-        <option name="comment">权限类型：group：管理员组 master：管理员</option>
-        <option name="default">master</option>
-      </options>
-    </field>
     <field name="group" type="string" column="group" length="20" nullable="false">
       <options>
         <option name="fixed"/>
@@ -34,10 +16,21 @@
         <option name="default">admin</option>
       </options>
     </field>
-    <field name="addTime" type="datetime" column="add_time" nullable="false">
+    <field name="addTime" type="string" column="add_time" nullable="false">
       <options>
+        <option name="fixed"/>
         <option name="comment">添加时间</option>
       </options>
     </field>
+    <many-to-one field="permission" target-entity="model\entity\AdminPermission" fetch="LAZY">
+      <join-columns>
+        <join-column name="permission_id" referenced-column-name="id"/>
+      </join-columns>
+    </many-to-one>
+    <many-to-one field="master" target-entity="model\entity\AdminMaster" fetch="LAZY">
+      <join-columns>
+        <join-column name="master_id" referenced-column-name="id"/>
+      </join-columns>
+    </many-to-one>
   </entity>
 </doctrine-mapping>

@@ -23,8 +23,9 @@
         <option name="comment">标签</option>
       </options>
     </field>
-    <field name="addTime" type="datetime" column="add_time" nullable="false">
+    <field name="addTime" type="string" column="add_time" nullable="false">
       <options>
+        <option name="fixed"/>
         <option name="comment">添加时间</option>
       </options>
     </field>

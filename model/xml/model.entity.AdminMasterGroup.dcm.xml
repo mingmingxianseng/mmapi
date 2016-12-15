@@ -20,6 +20,10 @@
         <option name="comment">该用户组的能看到的导航</option>
       </options>
     </field>
-    <field name="addTime" type="datetime" column="add_time" nullable="false"/>
+    <field name="addTime" type="string" column="add_time" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
   </entity>
 </doctrine-mapping>

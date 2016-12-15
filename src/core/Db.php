@@ -8,6 +8,7 @@
 
 namespace mmapi\core;
 
+use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\IBMDB2\DB2Exception;
 use Doctrine\DBAL\Exception\DriverException;
@@ -34,12 +35,20 @@ class Db
 
             $config = Setup::createXMLMetadataConfiguration($conf['path'], $conf['is_dev_mode'] == true, null, null);
             $config->setSQLLogger(new SqlLog());
+            $memcache = new MemcachedCache();
+            /** @var \Memcached $memcacheHandler */
+            $memcacheHandler = Cache::store()->handler();
+            $memcache->setMemcached($memcacheHandler);
+            $config->setQueryCacheImpl($memcache);
+            $config->setResultCacheImpl($memcache);
             try {
-                self::$instances[$name] = EntityManager::create($conf['conn'], $config);
+                self::$instances[$name] = $entityManager = EntityManager::create($conf['conn'], $config);
+                $platform               = $entityManager->getConnection()
+                    ->getDatabasePlatform();
+                $platform->registerDoctrineTypeMapping('enum', 'string');
             } catch (\Exception $e) {
                 throw new AppException("创建DB实例失败，请检查实例", 'DB_CREATE_FAILED', $conf);
             }
-
         }
 
         return self::$instances[$name];
@@ -50,6 +59,8 @@ class Db
      * @author chenmingming
      *
      * @param object $object 待更新或者插入的对象 entity
+     *
+     * @throws AppException
      */
     static public function save($object)
     {
@@ -57,11 +68,35 @@ class Db
         try {
             self::create()->flush();
         } catch (DriverException $e) {
-            throw new AppException($e->getMessage(), "SQL_" . $e->getErrorCode(), $e->getTrace());
-        } catch (DBALException $e) {
-            throw new AppException($e->getMessage(), "SQL_ERROR", $e->getTrace());
-        }
+            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
 
+        } catch (DBALException $e) {
+            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            throw new AppException($msg, "SQL_ERROR", $e->getTrace());
+        }
+    }
+
+    /**
+     * @desc   remove
+     * @author chenmingming
+     * @param $object
+     *
+     * @throws AppException
+     */
+    static public function remove($object)
+    {
+        self::create()->remove($object);
+        try {
+            self::create()->flush();
+        } catch (DriverException $e) {
+            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
+
+        } catch (DBALException $e) {
+            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            throw new AppException($msg, "SQL_ERROR", $e->getTrace());
+        }
     }
 
     /**

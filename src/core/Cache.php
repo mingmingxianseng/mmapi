@@ -91,7 +91,7 @@ class Cache
      *
      * @return \mmapi\cache\Driver
      */
-    public static function store($name)
+    public static function store($name = 'default')
     {
         if ('complex' == Config::get('cache.type')) {
             self::connect(Config::get('cache.' . $name), strtolower($name));

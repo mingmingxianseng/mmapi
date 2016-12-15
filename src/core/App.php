@@ -20,8 +20,8 @@ class  App
         register_shutdown_function('mmapi\core\App::fatalError');
         set_error_handler('mmapi\core\App::appError');
 
-        define('DEBUG', Config::get('debug') == true);
         define('REQUEST_ID', uniqid());
+        define('START_TIME', microtime(true));
 
         error_reporting(Config::get('error_reportiong', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED & ~E_WARNING));
         ini_set('display_errors', false);
@@ -30,17 +30,6 @@ class  App
             throw new AppException("VPATH can't be empty!", 'VPATH_EMPTY');
         }
         define('VPATH', Config::get('vpath'));
-
-        self::init();
-        Dispatcher::dispatch();
-    }
-
-    /**
-     * @desc   init 初始化
-     * @author chenmingming
-     */
-    static private function init()
-    {
         //定义是否AJAX请求
         define('IS_AJAX',
             isset($_SERVER['HTTP_X_REQUESTED_WITH']) and
@@ -52,6 +41,19 @@ class  App
             . ($_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR'])
             . $_SERVER['REQUEST_URI']
         );
+        self::loadConf();
+
+        define('DEBUG', Config::get('debug') == true);
+
+        Dispatcher::dispatch();
+    }
+
+    /**
+     * @desc   loadConf 加载配置文件
+     * @author chenmingming
+     */
+    static private function loadConf()
+    {
         //加载默认配置文件
         $default_conf_path = dirname(__DIR__) . '/convention.php';
         is_file($default_conf_path) && Config::batchSet(include $default_conf_path);
@@ -59,17 +61,15 @@ class  App
         $conf_path = Config::get('conf_path', VPATH . '/conf');
         define('CONF_PATH', $conf_path);
 
-        $conf_file = Config::get('conf_file', 'conf.php');
-        $conf_file = CONF_PATH . '/' . $conf_file;
-        is_file($conf_file) and Config::batchSet(include $conf_file);
+        $conf_file_array = Config::get('conf_file', ['conf.php']);
+        if (is_string($conf_file_array)) {
+            $conf_file_array = [$conf_file_array];
+        }
+        foreach ($conf_file_array as $file) {
+            $file = CONF_PATH . '/' . $file;
+            is_file($file) and Config::batchSet(include $file);
+        }
 
-        $file_load = ' [File loaded：' . count(get_included_files()) . ']';
-        $server    = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '0.0.0.0';
-        $remote    = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-        $method    = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI';
-
-        $info = __URL__ . "\t{$server}\t{$remote}\t{$method}\t$file_load";
-        Log::write($info);
     }
 
     /**
@@ -81,16 +81,19 @@ class  App
      */
     static public function handleException($e)
     {
-        if ($e instanceof AppException) {
-            Response::create()->error($e->getErrno(), $e->getMessage(), $e->getDetail());
-        } else {
-            if (DEBUG) {
-                Response::create()->error('undefined_exception', $e->getMessage(), $e->getTrace());
-            } else {
-                Response::create()->error(Config::get('response.default_errno'), Config::get('response.default_errmsg'));
-            }
 
+        if ($e instanceof AppException) {
+            $errno = $e->getErrno();
+        } else {
+            $errno = $e->getCode();
         }
+        Log::error("[{$errno}]:{$e->getMessage()}");
+        Log::error("trace:\r\n" . var_export(explode("\n", $e->getTraceAsString()), true));
+
+        if (!headers_sent() && DEBUG) {
+            Response::create()->error($errno, $e->getMessage(), explode("\n", $e->getTraceAsString()));
+        }
+        self::lastLog();
     }
 
     // 致命错误捕获
@@ -99,6 +102,19 @@ class  App
         if ($e = error_get_last()) {
             Response::create()->error('fatal_error', $e['message'], $e);
         }
+        self::lastLog();
+    }
+
+    static private function lastLog()
+    {
+        $file_load  = ' [File loaded：' . count(get_included_files()) . ']';
+        $server     = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '0.0.0.0';
+        $remote     = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+        $method     = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI';
+        $timeloaded = sprintf("[ time: %.6f s]", microtime(true) - START_TIME);
+
+        $info = __URL__ . "\t{$server}\t{$remote}\t{$method}\t$file_load\t$timeloaded";
+        Log::write($info, Log::INFO);
         Log::save();
     }
 
@@ -116,6 +132,8 @@ class  App
      */
     static public function appError($errno, $errstr, $errfile, $errline)
     {
+        $errno & Config::get('error_reporting') === $errno
+        &&
         Log::error("[{$errno}] $errstr \r\n #{$errfile} +{$errline}");
     }
 

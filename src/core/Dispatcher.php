@@ -28,7 +28,7 @@ class Dispatcher
             throw new AppException("模块{$class}不存在", 'module_not_fund', $action);
         }
         $ajax   = new $class();
-        $method = Config::get('dispatcher.method', 'run');
+        $method = Config::get('dispatcher.method', 'main');
         if (method_exists($ajax, $method)) {
             $ajax->$method();
         } else {

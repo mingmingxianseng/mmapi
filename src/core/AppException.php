@@ -21,7 +21,7 @@ class AppException extends \Exception
      */
     public function __construct($msg, $errno = 'ERROR', $detail = [])
     {
-        $this->errno  = $errno;
+        $this->errno  = strtoupper($errno);
         $this->detail = $detail;
         parent::__construct($msg, (int)$errno);
     }
