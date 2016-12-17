@@ -12,6 +12,8 @@ use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\IBMDB2\DB2Exception;
 use Doctrine\DBAL\Exception\DriverException;
+use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
+use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 
@@ -32,13 +34,18 @@ class Db
     {
         if (!isset(self::$instances[$name])) {
             $conf = Config::get('db.' . $name);
-
-            $config = Setup::createXMLMetadataConfiguration($conf['path'], $conf['is_dev_mode'] == true, null, null);
-            $config->setSQLLogger(new SqlLog());
             $memcache = new MemcachedCache();
             /** @var \Memcached $memcacheHandler */
             $memcacheHandler = Cache::store()->handler();
             $memcache->setMemcached($memcacheHandler);
+            $config = Setup::createConfiguration($conf['is_dev_mode']==true,null, $memcache);
+
+            $driver = new XmlDriver($conf['path']);
+            $config->setMetadataDriverImpl($driver);
+
+            $config->setSQLLogger(new SqlLog());
+
+            $config->setMetadataCacheImpl($memcache);
             $config->setQueryCacheImpl($memcache);
             $config->setResultCacheImpl($memcache);
             try {
@@ -80,6 +87,7 @@ class Db
     /**
      * @desc   remove
      * @author chenmingming
+     *
      * @param $object
      *
      * @throws AppException

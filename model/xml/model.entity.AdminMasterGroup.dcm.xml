@@ -14,16 +14,5 @@
         <option name="default"/>
       </options>
     </field>
-    <field name="gNavigation" type="text" column="g_navigation" length="65535" nullable="false">
-      <options>
-        <option name="fixed"/>
-        <option name="comment">该用户组的能看到的导航</option>
-      </options>
-    </field>
-    <field name="addTime" type="string" column="add_time" nullable="false">
-      <options>
-        <option name="fixed"/>
-      </options>
-    </field>
   </entity>
 </doctrine-mapping>

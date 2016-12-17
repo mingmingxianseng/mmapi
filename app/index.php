@@ -20,8 +20,7 @@ class index extends Api
     public function run()
     {
         $this
-            ->set('data', [1, 23])
-            ->send();
+            ->set('data', [1, 23]);
     }
 
 }

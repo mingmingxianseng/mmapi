@@ -40,7 +40,9 @@ class curlTest extends \PHPUnit_Framework_TestCase
         } catch (Exception $e) {
             var_dump(get_class($e));
         }
+    }
 
+    public function test1(){
 
     }
 
