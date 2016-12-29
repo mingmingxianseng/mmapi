@@ -135,9 +135,11 @@ class Response
      */
     public function set($key, $value, $formatToString = false)
     {
-        is_null($value)
-        ||
-        $this->data[$key] = $formatToString ? $this->formatToString($value) : $value;
+        if (is_null($value)) {
+            unset($this->data[$key]);
+        } else {
+            $this->data[$key] = $formatToString ? $this->formatToString($value) : $value;
+        }
 
         return $this;
     }

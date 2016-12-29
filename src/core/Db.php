@@ -12,54 +12,17 @@ use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\IBMDB2\DB2Exception;
 use Doctrine\DBAL\Exception\DriverException;
+use Doctrine\ORM\Mapping\AnsiQuoteStrategy;
+use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
 use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use mmapi\cache\DbCache;
 
 class Db
 {
     static private $instances;
-
-    /**
-     * @desc   create
-     * @author chenmingming
-     *
-     * @param string $name db配置名称
-     *
-     * @return EntityManager
-     * @throws AppException
-     */
-    static public function create($name = 'default')
-    {
-        if (!isset(self::$instances[$name])) {
-            $conf = Config::get('db.' . $name);
-            $memcache = new MemcachedCache();
-            /** @var \Memcached $memcacheHandler */
-            $memcacheHandler = Cache::store()->handler();
-            $memcache->setMemcached($memcacheHandler);
-            $config = Setup::createConfiguration($conf['is_dev_mode']==true,null, $memcache);
-
-            $driver = new XmlDriver($conf['path']);
-            $config->setMetadataDriverImpl($driver);
-
-            $config->setSQLLogger(new SqlLog());
-
-            $config->setMetadataCacheImpl($memcache);
-            $config->setQueryCacheImpl($memcache);
-            $config->setResultCacheImpl($memcache);
-            try {
-                self::$instances[$name] = $entityManager = EntityManager::create($conf['conn'], $config);
-                $platform               = $entityManager->getConnection()
-                    ->getDatabasePlatform();
-                $platform->registerDoctrineTypeMapping('enum', 'string');
-            } catch (\Exception $e) {
-                throw new AppException("创建DB实例失败，请检查实例", 'DB_CREATE_FAILED', $conf);
-            }
-        }
-
-        return self::$instances[$name];
-    }
 
     /**
      * @desc   save 更新或者插入
@@ -75,13 +38,44 @@ class Db
         try {
             self::create()->flush();
         } catch (DriverException $e) {
-            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
             throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
 
         } catch (DBALException $e) {
-            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
             throw new AppException($msg, "SQL_ERROR", $e->getTrace());
         }
+    }
+
+    /**
+     * @desc   create
+     * @author chenmingming
+     *
+     * @param string $name db配置名称
+     *
+     * @return EntityManager
+     * @throws AppException
+     */
+    static public function create($name = 'default')
+    {
+        if (!isset(self::$instances[$name])) {
+            $conf     = Config::get('db.' . $name);
+            $memcache = new DbCache();
+            $config = Setup::createConfiguration($conf['is_dev_mode'] == true, null, $memcache);
+            $config->setMetadataDriverImpl(new XmlDriver($conf['path']));
+
+            $config->setSQLLogger(new SqlLog());
+            try {
+                self::$instances[$name] = $entityManager = EntityManager::create($conf['conn'], $config);
+                $platform               = $entityManager->getConnection()
+                    ->getDatabasePlatform();
+                $platform->registerDoctrineTypeMapping('enum', 'string');
+            } catch (\Exception $e) {
+                throw new AppException("创建DB实例失败，请检查实例", 'DB_CREATE_FAILED', $conf);
+            }
+        }
+
+        return self::$instances[$name];
     }
 
     /**
@@ -118,5 +112,24 @@ class Db
     static public function qb($name = 'default')
     {
         return self::create($name)->createQueryBuilder();
+    }
+
+    /**
+     * Finds an Entity by its identifier.
+     *
+     * @param string       $entityName  The class name of the entity to find.
+     * @param mixed        $id          The identity of the entity to find.
+     * @param integer|null $lockMode    One of the \Doctrine\DBAL\LockMode::* constants
+     *                                  or NULL if no specific lock mode should be used
+     *                                  during the search.
+     * @param integer|null $lockVersion The version of the entity to find when using
+     *                                  optimistic locking.
+     *
+     * @return object|null The entity instance or NULL if the entity can not be found.
+     *
+     */
+    static public function find($entityName, $id, $lockMode = null, $lockVersion = null)
+    {
+        return self::create()->find($entityName, $id, $lockMode, $lockVersion);
     }
 }

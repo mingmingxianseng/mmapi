@@ -297,7 +297,8 @@ class ApiParams
                 $this->value = (int)$this->value;
                 break;
             case self::TYPE_FLOAT:
-                if (!is_float($this->value)) {
+
+                if (!Validate::isFloat($this->value)) {
                     throw new AppException("参数{$this->key}:{$this->value}非浮点数", 'APIPARAM_NOT_FLOAT');
                 }
                 $this->value = (float)$this->value;

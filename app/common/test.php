@@ -22,8 +22,7 @@ class test extends Api
 
     public function run()
     {
-        $this->set('data', $this->id)
-            ->send();
+        $this->set('data', $this->id);
     }
 
 }

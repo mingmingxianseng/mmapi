@@ -14,8 +14,6 @@ abstract class Driver
 {
     const DIR_DEEP = 2;//目录深度
     //文件控件名称
-    protected $fileinput_name = "image";
-
     private $legal_ext
         = [
             1 => 'gif', 2 => 'jpg', 3 => 'png', 6 => 'bmp',
@@ -137,7 +135,7 @@ abstract class Driver
     protected function getFileTempName()
     {
         if ($_FILES) {
-            switch ($_FILES[$this->fileinput_name]['error']) {
+            switch ($_FILES[$this->options['input_name']]['error']) {
                 case 1:
                 case 2:
                     throw new ImageException('图片大小超出限制', 'img_size_limit');
@@ -153,7 +151,7 @@ abstract class Driver
             throw new ImageException('没接受到上传文件~', 'no_image_file');
         }
 
-        return $_FILES[$this->fileinput_name]['tmp_name'];
+        return $_FILES[$this->options['input_name']]['tmp_name'];
     }
 
     /**
