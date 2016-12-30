@@ -23,31 +23,8 @@ use mmapi\cache\DbCache;
 class Db
 {
     static private $instances;
-
-    /**
-     * @desc   save 更新或者插入
-     * @author chenmingming
-     *
-     * @param object $object 待更新或者插入的对象 entity
-     *
-     * @throws AppException
-     */
-    static public function save($object)
-    {
-        self::create()->persist($object);
-        try {
-            self::create()->flush();
-        } catch (DriverException $e) {
-            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
-            throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
-
-        } catch (DBALException $e) {
-            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
-            throw new AppException($msg, "SQL_ERROR", $e->getTrace());
-        }
-    }
-
-    /**
+    
+   /**
      * @desc   create
      * @author chenmingming
      *
@@ -78,6 +55,30 @@ class Db
         return self::$instances[$name];
     }
 
+    /**
+     * @desc   save 更新或者插入
+     * @author chenmingming
+     *
+     * @param object $object 待更新或者插入的对象 entity
+     *
+     * @throws AppException
+     */
+    static public function save($object)
+    {
+        self::create()->persist($object);
+        try {
+            self::create()->flush();
+        } catch (DriverException $e) {
+            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
+            throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
+
+        } catch (DBALException $e) {
+            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
+            throw new AppException($msg, "SQL_ERROR", $e->getTrace());
+        }
+    }
+
+ 
     /**
      * @desc   remove
      * @author chenmingming

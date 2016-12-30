@@ -309,6 +309,13 @@ class ApiParams
                     throw new AppException("参数{$this->key}:{$this->value}非json字符串", 'APIPARAM_NOT_JSON');
                 }
                 break;
+            case self::TYPE_ARRAY:
+                if (!is_array($this->value)) {
+                    throw new AppException("参数{$this->key}:{$this->value}非数组", 'APIPARAM_NOT_ARRAY');
+                }
+                break;
+            default:
+                throw new AppException("非法的参数类型", 'APIPARAM_INVALID');
         }
     }
 
