@@ -61,7 +61,7 @@ class Db
         if (!isset(self::$instances[$name])) {
             $conf     = Config::get('db.' . $name);
             $memcache = new DbCache();
-            $config = Setup::createConfiguration($conf['is_dev_mode'] == true, null, $memcache);
+            $config   = Setup::createConfiguration($conf['is_dev_mode'] == true, null, $memcache);
             $config->setMetadataDriverImpl(new XmlDriver($conf['path']));
 
             $config->setSQLLogger(new SqlLog());
@@ -132,4 +132,33 @@ class Db
     {
         return self::create()->find($entityName, $id, $lockMode, $lockVersion);
     }
+
+    /**
+     * @desc   exec
+     * @author chenmingming
+     *
+     * @param $sql
+     *
+     * @return int
+     */
+    static public function exec($sql)
+    {
+        return Db::create()->getConnection()->executeUpdate($sql);
+    }
+
+    /**
+     * @desc   fetch
+     * @author chenmingming
+     *
+     * @param string $sql    sql
+     *
+     * @param array  $params 参数列表
+     *
+     * @return \Doctrine\DBAL\Driver\Statement The executed statement.
+     */
+    static public function query($sql, $params = [])
+    {
+        return Db::create()->getConnection()->executeQuery($sql, $params);
+    }
+
 }

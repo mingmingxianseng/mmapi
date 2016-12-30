@@ -38,7 +38,7 @@ class SqlLog implements SQLLogger
 
         $sql = "[" . self::$num . "] " . $sql;
         if (null !== $params) {
-            $sql = str_replace('?', '"%s"', $sql);
+            $sql = str_replace(['?'], '"%s"', $sql);
             $sql = vsprintf($sql, $this->normalizeParams($params));
         }
         Log::sql($sql);
