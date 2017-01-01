@@ -8,7 +8,8 @@
 
 namespace mmxs\MMPHP\tests;
 
-use MMPHP\core\Config;
+
+use mmapi\core\Config;
 
 class configTest extends \PHPUnit_Framework_TestCase
 {

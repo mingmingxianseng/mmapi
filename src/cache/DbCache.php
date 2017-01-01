@@ -18,12 +18,9 @@ class DbCache extends CacheProvider
     /** @var  Memcached */
     protected $memcached;
 
-    public function __construct()
+    public function __construct(Memcached $memcached)
     {
-        $this->memcached = Cache::store()->handler();
-        if (!($this->memcached instanceof Memcached)) {
-            throw new AppException('db缓存只支持memcached');
-        }
+        $this->memcached = $memcached;
     }
 
     /**

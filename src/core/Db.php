@@ -19,12 +19,13 @@ use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use mmapi\cache\DbCache;
+use mmapi\cache\driver\Memcached;
 
 class Db
 {
     static private $instances;
-    
-   /**
+
+    /**
      * @desc   create
      * @author chenmingming
      *
@@ -37,8 +38,14 @@ class Db
     {
         if (!isset(self::$instances[$name])) {
             $conf     = Config::get('db.' . $name);
-            $memcache = new DbCache();
-            $config   = Setup::createConfiguration($conf['is_dev_mode'] == true, null, $memcache);
+            $cache    = Cache::store();
+            $memcache = null;
+            if ($cache) {
+                /** @var \Memcached $handler */
+                $handler = $cache->handler();
+                $handler instanceof Memcached && $memcache = new DbCache($handler);
+            }
+            $config = Setup::createConfiguration($conf['is_dev_mode'] == true, null, $memcache);
             $config->setMetadataDriverImpl(new XmlDriver($conf['path']));
 
             $config->setSQLLogger(new SqlLog());
@@ -78,7 +85,6 @@ class Db
         }
     }
 
- 
     /**
      * @desc   remove
      * @author chenmingming
@@ -138,13 +144,14 @@ class Db
      * @desc   exec
      * @author chenmingming
      *
-     * @param $sql
+     * @param string $sql    sql
+     * @param array  $params 绑定参数列表
      *
      * @return int
      */
-    static public function exec($sql)
+    static public function exec($sql, $params = [])
     {
-        return Db::create()->getConnection()->executeUpdate($sql);
+        return Db::create()->getConnection()->executeUpdate($sql, $params);
     }
 
     /**
