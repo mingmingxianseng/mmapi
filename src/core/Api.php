@@ -10,19 +10,27 @@ namespace mmapi\core;
 
 abstract class Api
 {
-
+    const OPT_DEBUG = 'debug';
+    const OPT_FORMAT_TO_STRING = 'format_to_string';
+    const OPT_DEFAULT_CODE = 'default_code';
+    const OPT_DEFAULT_MSG = 'default_msg';
     //接口请求开始时间
     protected $_start_time;
     //参数定义
     protected $options = [
-        'debug'            => false,
-        'format_to_string' => true,
-        'default_code'     => 'SUCCESS',
-        'default_msg'      => 'SUCCESS',
+        self::OPT_DEBUG            => false,
+        self::OPT_FORMAT_TO_STRING => true,
+        self::OPT_DEFAULT_CODE     => 'SUCCESS',
+        self::OPT_DEFAULT_MSG      => 'SUCCESS',
     ];
 
     /** @var ApiParams[] */
     protected $params = [];
+
+    /**
+     * @var array 调试信息
+     */
+    private $debug = [];
 
     /**
      * @desc   init 初始化
@@ -54,12 +62,18 @@ abstract class Api
      */
     public function __construct()
     {
-        $this->_start_time = microtime(true);
-        $this->options     = array_merge($this->options, Config::get('api', []));
-        $this->init();
-        $this->parse();
-        $this->set('code', $this->options['default_code']);
-        $this->set('msg', $this->options['default_msg']);
+        try {
+            $this->_start_time = microtime(true);
+            $this->options     = array_merge($this->options, Config::get('api', []));
+            $this->init();
+            $this->parse();
+            $this->set('code', $this->options[self::OPT_DEFAULT_CODE]);
+            $this->set('msg', $this->options[self::OPT_DEFAULT_MSG]);
+        } catch (\Exception $e) {
+            $this->exceptionHandler($e);
+            throw new $e;
+        }
+
     }
 
     /**
@@ -78,20 +92,32 @@ abstract class Api
      * @desc   exceptionHandler 异常拦截
      * @author chenmingming
      *
-     * @param AppException $e
+     * @param \Exception $e
      */
     public function exceptionHandler(\Exception $e)
     {
         $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
 
-        if ($this->options['debug']) {
+        if ($this->options[self::OPT_DEBUG]) {
             $this->set('exception', get_class($e))
                 ->set('trace', explode("\n", $e->getTraceAsString()));
             method_exists($e, 'getDetail') && $this->set('detail', $e->getDetail());
 
         }
-        $this->set('code', $errno)
-            ->set('msg', $e->getMessage())
+        $this->error($e->getMessage(), $errno);
+    }
+
+    /**
+     * @desc   error 错误输出
+     * @author chenmingming
+     *
+     * @param string $msg  错误字符串
+     * @param string $code 错误码
+     */
+    protected function error($msg, $code)
+    {
+        $this->set('code', $code)
+            ->set('msg', $msg)
             ->send();
     }
 
@@ -112,6 +138,19 @@ abstract class Api
         }
 
         return $this->params[$param];
+    }
+
+    /**
+     * @desc   removeParam
+     * @author chenmingming
+     *
+     * @param string $key 参数名称
+     */
+    final public function removeParam($key)
+    {
+        if (isset($this->params[$key])) {
+            unset($this->params[$key]);
+        }
     }
 
     /**
@@ -145,20 +184,6 @@ abstract class Api
     }
 
     /**
-     * @desc   createParam
-     * @author chenmingming
-     *
-     * @param        $key
-     * @param string $type
-     *
-     * @return ApiParams
-     */
-    protected function createParam($key, $type = ApiParams::TYPE_STRING)
-    {
-        return new ApiParams($key, $type);
-    }
-
-    /**
      * @desc   setField
      * @author chenmingming
      *
@@ -181,7 +206,7 @@ abstract class Api
      */
     final protected function set($key, $value)
     {
-        Response::create()->set($key, $value, $this->options['format_to_string'] == true);
+        Response::create()->set($key, $value, $this->options[self::OPT_FORMAT_TO_STRING] == true);
 
         return $this;
     }
@@ -190,9 +215,9 @@ abstract class Api
      * @desc   _beforeOutput 输出数据之前的拦截器
      * @author chenmingming
      */
-    protected function beforeRespnse()
+    protected function beforeResponse()
     {
-
+        $this->options[self::OPT_DEBUG] && $this->set('debug', $this->debug);
     }
 
     /**
@@ -202,8 +227,8 @@ abstract class Api
      */
     final private function send()
     {
-        $this->options['debug'] && $this->calcost();
-        $this->beforeRespnse();
+        $this->options[self::OPT_DEBUG] && $this->calcost();
+        $this->beforeResponse();
         Response::create()->send();
         $this->afterResponse();
     }
@@ -224,10 +249,20 @@ abstract class Api
      */
     protected function calcost()
     {
-        $this->set('debug', [
-            'cost_time' => sprintf('%.6f', microtime(true) - $this->_start_time),
-            'cost_mem'  => sprintf('%.6f', memory_get_usage(true) / 1048576),
-        ]);
+        $this->debug('cost_time', sprintf('%.6f', microtime(true) - $this->_start_time));
+        $this->debug('cost_mem', sprintf('%.6f', memory_get_usage(true) / 1048576));
+    }
+
+    /**
+     * @desc   debug
+     * @author chenmingming
+     *
+     * @param $key
+     * @param $value
+     */
+    protected function debug($key, $value)
+    {
+        $this->debug[$key] = $value;
     }
 
     /**

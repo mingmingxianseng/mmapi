@@ -99,9 +99,10 @@ class  App
     // 致命错误捕获
     static public function fatalError()
     {
-        if ($e = error_get_last()) {
+        if ($e = error_get_last() && DEBUG) {
             Response::create()->error('fatal_error', $e['message'], $e);
         }
+
         self::lastLog();
     }
 
