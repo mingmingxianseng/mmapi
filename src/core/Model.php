@@ -22,7 +22,9 @@ abstract class Model
      */
     static public function getInstance($id)
     {
-        return Db::create()->find(get_called_class(), $id);
+        $class = get_called_class();
+
+        return Db::create($class::DB_INI)->find($class, $id);
     }
 
     /**
@@ -32,6 +34,8 @@ abstract class Model
      */
     static function getRepository()
     {
-        return Db::create()->getRepository(get_called_class());
+        $class = get_called_class();
+
+        return Db::create($class::DB_INI)->getEntityManager()->getRepository($class);
     }
 }
