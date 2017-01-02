@@ -25,38 +25,58 @@ class Db
 {
     static private $instances;
 
+    private $options = [];
+    //该数据库配置名称 唯一
+    private $db_name;
+
+    /** @var  EntityManager */
+    private $entityManager;
+
+    /**
+     * Db constructor.
+     *
+     * @param array $options 数据库配置
+     *
+     * @throws AppException
+     */
+    public function __construct($options)
+    {
+        $this->options = $options;
+        $this->db_name = isset($options['name']) ? $options['name'] : md5(serialize($options));
+        $cache         = Cache::store();
+        $memcache      = null;
+        if ($cache) {
+            /** @var \Memcached $handler */
+            $handler = $cache->handler();
+            $handler instanceof Memcached && $memcache = new DbCache($handler);
+        }
+        $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $memcache);
+        $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));
+
+        $config->setSQLLogger(new SqlLog());
+        try {
+            $this->entityManager = EntityManager::create($this->options['conn'], $config);
+        } catch (\Exception $e) {
+            throw new AppException("创建DB实例失败，请检查实例", 'DB_CREATE_FAILED', $this->options);
+        }
+        self::$instances[$this->db_name] = $this;
+    }
+
     /**
      * @desc   create
      * @author chenmingming
      *
      * @param string $name db配置名称
      *
-     * @return EntityManager
+     * @return Db
      * @throws AppException
      */
     static public function create($name = 'default')
     {
         if (!isset(self::$instances[$name])) {
-            $conf     = Config::get('db.' . $name);
-            $cache    = Cache::store();
-            $memcache = null;
-            if ($cache) {
-                /** @var \Memcached $handler */
-                $handler = $cache->handler();
-                $handler instanceof Memcached && $memcache = new DbCache($handler);
-            }
-            $config = Setup::createConfiguration($conf['is_dev_mode'] == true, null, $memcache);
-            $config->setMetadataDriverImpl(new XmlDriver($conf['path']));
-
-            $config->setSQLLogger(new SqlLog());
-            try {
-                self::$instances[$name] = $entityManager = EntityManager::create($conf['conn'], $config);
-                $platform               = $entityManager->getConnection()
-                    ->getDatabasePlatform();
-                $platform->registerDoctrineTypeMapping('enum', 'string');
-            } catch (\Exception $e) {
-                throw new AppException("创建DB实例失败，请检查实例", 'DB_CREATE_FAILED', $conf);
-            }
+            $conf         = Config::get('db.' . $name);
+            $conf['name'] = $name;
+            new self($conf);
         }
 
         return self::$instances[$name];
@@ -70,11 +90,11 @@ class Db
      *
      * @throws AppException
      */
-    static public function save($object)
+    public function save($object)
     {
-        self::create()->persist($object);
+        $this->entityManager->persist($object);
         try {
-            self::create()->flush();
+            $this->entityManager->flush();
         } catch (DriverException $e) {
             $msg = DEBUG ? $e->getMessage() : '更新数据失败';
             throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
@@ -93,17 +113,17 @@ class Db
      *
      * @throws AppException
      */
-    static public function remove($object)
+    public function remove($object)
     {
-        self::create()->remove($object);
+        $this->entityManager->remove($object);
         try {
-            self::create()->flush();
+            $this->entityManager->flush();
         } catch (DriverException $e) {
-            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            $msg = DEBUG ? '删除数据失败' : $e->getMessage();
             throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
 
         } catch (DBALException $e) {
-            $msg = DEBUG ? '更新数据失败' : $e->getMessage();
+            $msg = DEBUG ? '删除数据失败' : $e->getMessage();
             throw new AppException($msg, "SQL_ERROR", $e->getTrace());
         }
     }
@@ -112,13 +132,21 @@ class Db
      * @desc   qb
      * @author chenmingming
      *
-     * @param string $name
-     *
      * @return \Doctrine\ORM\QueryBuilder
      */
-    static public function qb($name = 'default')
+    public function dqlBuilder()
     {
-        return self::create($name)->createQueryBuilder();
+        return $this->entityManager->createQueryBuilder();
+    }
+
+    /**
+     * @desc   sqlBuilder
+     * @author chenmingming
+     * @return QueryBuilder
+     */
+    public function sqlBuilder()
+    {
+        return new QueryBuilder($this, $this->options['queryBuilder']);
     }
 
     /**
@@ -135,9 +163,9 @@ class Db
      * @return object|null The entity instance or NULL if the entity can not be found.
      *
      */
-    static public function find($entityName, $id, $lockMode = null, $lockVersion = null)
+    public function find($entityName, $id, $lockMode = null, $lockVersion = null)
     {
-        return self::create()->find($entityName, $id, $lockMode, $lockVersion);
+        return $this->entityManager->find($entityName, $id, $lockMode, $lockVersion);
     }
 
     /**
@@ -149,9 +177,9 @@ class Db
      *
      * @return int
      */
-    static public function exec($sql, $params = [])
+    public function exec($sql, $params = [])
     {
-        return Db::create()->getConnection()->executeUpdate($sql, $params);
+        return $this->entityManager->getConnection()->executeUpdate($sql, $params);
     }
 
     /**
@@ -164,9 +192,28 @@ class Db
      *
      * @return \Doctrine\DBAL\Driver\Statement The executed statement.
      */
-    static public function query($sql, $params = [])
+    public function query($sql, $params = [])
     {
-        return Db::create()->getConnection()->executeQuery($sql, $params);
+        return $this->entityManager->getConnection()->executeQuery($sql, $params);
     }
 
+    /**
+     * @desc   getLastInsertId 上一次插入的id
+     * @author chenmingming
+     * @return string
+     */
+    public function getLastInsertId()
+    {
+        return $this->entityManager->getConnection()->lastInsertId();
+    }
+
+    /**
+     * @desc   getEntityManager
+     * @author chenmingming
+     * @return EntityManager
+     */
+    public function getEntityManager()
+    {
+        return $this->entityManager;
+    }
 }

@@ -5,3 +5,4 @@ project/
 cli-config.php
 bootstrap.php
 *.php~
+help.md

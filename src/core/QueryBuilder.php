@@ -8,13 +8,12 @@
 
 namespace mmapi\core;
 
-use model\footballModel;
-
 class QueryBuilder
 {
     const TYPE_SELECT = 'SELECT';
     const TYPE_UPDATE = 'UPDATE';
     const TYPE_INSERT = 'INSERT';
+    const TYPE_REPLACE = 'REPLACE';
     const TYPE_DELETE = 'DELETE';
 
     const QUERY_WHERE = 'where';
@@ -50,23 +49,29 @@ class QueryBuilder
     private $limit;
     private $params = [];
     private $sql;
+    /** @var  Db */
+    private $db;
 
-    public function __construct($options)
+    public function __construct(Db $db, $options)
     {
+        $this->db      = $db;
         $this->options = array_merge($this->options, $options);
     }
 
     /**
-     * @desc   create
+     * @desc   setOptions 配置
      * @author chenmingming
      *
-     * @param $options
+     * @param string $option 配置项
+     * @param mixed  $value  配置值
      *
-     * @return QueryBuilder
+     * @return $this
      */
-    static public function create($options)
+    public function setOptions($option, $value)
     {
-        return new self($options);
+        $this->options[$option] = $value;
+
+        return $this;
     }
 
     /**
@@ -112,6 +117,38 @@ class QueryBuilder
     public function update($tableName)
     {
         $this->query_type = self::TYPE_UPDATE;
+        $this->setTableName($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @desc   insert
+     * @author chenmingming
+     *
+     * @param string $tableName 表名称
+     *
+     * @return $this
+     */
+    public function insert($tableName)
+    {
+        $this->query_type = self::TYPE_INSERT;
+        $this->setTableName($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @desc   replace replace语句
+     * @author chenmingming
+     *
+     * @param string $tableName 表名称
+     *
+     * @return $this
+     */
+    public function replace($tableName)
+    {
+        $this->query_type = self::TYPE_REPLACE;
         $this->setTableName($tableName);
 
         return $this;
@@ -313,9 +350,7 @@ class QueryBuilder
      */
     public function value($value)
     {
-        $this->current_value = $value;
-        $this->current_exp   = false;
-        $this->parseCurrentField();
+        $this->exp($value, false);
 
         return $this;
     }
@@ -330,9 +365,7 @@ class QueryBuilder
      */
     public function expValue($value)
     {
-        $this->current_value = $value;
-        $this->current_exp   = true;
-        $this->parseCurrentField();
+        $this->exp($value, true);
 
         return $this;
     }
@@ -372,10 +405,14 @@ class QueryBuilder
      * @author chenmingming
      *
      * @param string $order 排序
+     *
+     * @return $this
      */
     public function order($order)
     {
         $this->order = $order;
+
+        return $this;
     }
 
     /**
@@ -449,16 +486,55 @@ class QueryBuilder
             case self::TYPE_UPDATE:
                 $this->parseUpdate();
                 break;
+            case self::TYPE_INSERT:
+                $this->parseInsert();
+                break;
+            case self::TYPE_REPLACE:
+                $this->parseReplace();
+                break;
+            case self::TYPE_DELETE:
+                $this->parseDelete();
+                break;
         }
 
         return $this;
     }
 
     /**
+     * @desc   parseDelete
+     * @author chenmingming
+     */
+    public function parseDelete()
+    {
+        $this->sql = "DELETE FROM {$this->table_name} ";
+        $this->sql .= $this->getWhereStr();
+    }
+
+    /**
+     * @desc   parseInsert 解析insert语法
+     * @author chenmingming
+     */
+    protected function parseInsert()
+    {
+        $this->sql = "INSERT INTO {$this->table_name} ";
+        $this->sql .= $this->getInsertStr();
+    }
+
+    /**
+     * @desc   parseReplace 解析replace语法
+     * @author chenmingming
+     */
+    protected function parseReplace()
+    {
+        $this->sql = "REPLACE INTO {$this->table_name} ";
+        $this->sql .= $this->getInsertStr();
+    }
+
+    /**
      * @desc   parseUpdate
      * @author chenmingming
      */
-    public function parseUpdate()
+    protected function parseUpdate()
     {
         $this->sql = "UPDATE {$this->table_name}";
         $this->sql .= $this->getUpdateStr();
@@ -478,6 +554,33 @@ class QueryBuilder
     }
 
     /**
+     * @desc   getInsertStr 获取insert字符串
+     * @author chenmingming
+     * @return string
+     */
+    protected function getInsertStr()
+    {
+        $fileds = [];
+        $values = [];
+        if ($this->data) {
+            foreach ($this->data as $item) {
+                list(, $field, $exp, $value) = $item;
+                $fileds[] = "`$field`";
+                if ($exp) {
+                    //表达式
+                    $values[] = $value;
+                } else {
+                    $values[]       = '?';
+                    $this->params[] = $value;
+                }
+
+            }
+        }
+
+        return sprintf('(%s)VALUES(%s)', implode(',', $fileds), implode(',', $values));
+    }
+
+    /**
      * @desc   getUpdateStr
      * @author chenmingming
      * @return string
@@ -494,8 +597,8 @@ class QueryBuilder
                     $str .= ',';
                 }
                 if ($exp) {
+                    //表达式
                     $str .= "`{$field}`={$value}";
-
                 } else {
                     $str .= "`{$field}`=?";
                     $this->params[] = $value;
@@ -527,20 +630,16 @@ class QueryBuilder
                 if ($exp) {
                     if ($exp == 'IN') {
                         if (is_array($value)) {
-
-                            $tmp = [];
-                            foreach ($value as $v) {
-                                $tmp[]          = '?';
-                                $this->params[] = $v;
-                            }
-                            $str .= " {$field} IN (" . implode(',', $tmp) . ") ";
+                            $this->params = array_merge($this->params, $value);
+                            $str .= " {$field} IN (" . implode(',', array_fill(0, count($value), '?')) . ") ";
                         }
-
+                        //非数组直接跳过
                     } else {
                         $str .= " {$field} {$exp} ? ";
                         $this->params[] = $value;
                     }
                 } else {
+                    //运算表达式
                     $str .= " {$field} {$value}";
                 }
 
@@ -572,9 +671,14 @@ class QueryBuilder
         }
     }
 
+    /**
+     * @desc   fetch
+     * @author chenmingming
+     * @return mixed
+     */
     public function fetch()
     {
-        return Db::query($this->getSql(), $this->params)->fetch();
+        return $this->db->query($this->getSql(), $this->params)->fetch();
     }
 
     /**
@@ -592,20 +696,55 @@ class QueryBuilder
         return isset($arr[$key]) ? $arr[$key] : null;
     }
 
+    /**
+     * @desc   fetchAll
+     * @author chenmingming
+     * @return array
+     */
     public function fetchAll()
     {
-        return Db::query($this->getSql(), $this->params)->fetchAll();
+        return $this->db->query($this->getSql(), $this->params)->fetchAll();
     }
 
+    /**
+     * @desc   exec return affected rows
+     * @author chenmingming
+     * @return int
+     */
     public function exec()
     {
-        return Db::exec($this->getSql(), $this->params);
+        return $this->db->exec($this->getSql(), $this->params);
     }
 
+    /**
+     * @desc   getParams
+     * @author chenmingming
+     * @return array
+     */
     public function getParams()
     {
         $this->getSql();
 
         return $this->params;
+    }
+
+    /**
+     * @desc   getDb 获取db实例
+     * @author chenmingming
+     * @return Db
+     */
+    public function getDb()
+    {
+        return $this->db;
+    }
+
+    /**
+     * @desc   getLastInsertId
+     * @author chenmingming
+     * @return string
+     */
+    public function getLastInsertId()
+    {
+        return $this->db->getLastInsertId();
     }
 }
