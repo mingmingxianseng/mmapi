@@ -32,10 +32,15 @@ class QueryBuilder
     private $current_type;//where 还是 data
     private $current_value;//值
     private $current_exp;//表达式
+    private $join = '';//关联表
 
     private $table_name;//表名
     private $data;
     private $field;
+
+    private $joinTable;//关联表
+    private $joinCondition;//关联条件
+    private $joinType;//json方式
 
     /**
      * field:'id'
@@ -104,6 +109,66 @@ class QueryBuilder
         $this->setTableName($tableName, $alias);
 
         return $this;
+    }
+
+    public function join($tableName, $alias = '', $type = 'INNER')
+    {
+        $this->parseJoin();
+        $this->joinType  = $type;
+        $this->joinTable = $tableName . ' ' . $alias;
+
+        return $this;
+    }
+
+    public function leftJoin($tableName, $alias = '')
+    {
+        return $this->join($tableName, $alias, 'LEFT');
+    }
+
+    public function rightJoin($tableName, $alias = '')
+    {
+        return $this->join($tableName, $alias, 'RIGHT');
+    }
+
+    /**
+     * @desc   on
+     * @author chenmingming
+     *
+     * @param        $fieldA
+     * @param        $fieldB
+     * @param string $exp
+     * @param string $logic
+     *
+     * @return $this
+     */
+    public function on($fieldA, $fieldB, $exp = '=', $logic = 'and')
+    {
+        $this->joinCondition[] = [$fieldA, $fieldB, $exp, $logic];
+
+        return $this;
+    }
+
+    /**
+     * @desc   parseJoin 解析关联表关系
+     * @author chenmingming
+     */
+    protected function parseJoin()
+    {
+        $sql = '';
+        if ($this->joinTable && $this->joinType && $this->joinCondition) {
+            $sql   = "$this->joinType JOIN {$this->joinTable}";
+            $first = true;
+            foreach ($this->joinCondition as $condition) {
+                list($filedA, $filedB, $exp, $logic) = $condition;
+                if ($first) {
+                    $sql .= " ON {$filedA} {$exp} {$filedB}";
+                } else {
+                    $sql .= " {$logic} {$filedA} {$exp} {$filedB}";
+                }
+            }
+            $this->joinTable = $this->joinType = $this->joinCondition = null;
+        }
+        $this->join .= $sql;
     }
 
     /**
@@ -548,9 +613,22 @@ class QueryBuilder
     protected function parseSelect()
     {
         $this->sql = "SELECT {$this->field} FROM {$this->table_name} ";
+        $this->sql .= $this->getJoinStr();
         $this->sql .= $this->getWhereStr();
         $this->order && $this->sql .= " ORDER BY {$this->order} ";
         $this->limit && $this->sql .= " {$this->limit} ";
+    }
+
+    /**
+     * @desc   getJoinStr
+     * @author chenmingming
+     * @return string
+     */
+    protected function getJoinStr()
+    {
+        $this->parseJoin();
+
+        return $this->join;
     }
 
     /**

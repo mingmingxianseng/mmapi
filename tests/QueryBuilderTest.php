@@ -243,4 +243,16 @@ class QueryBuilderTest extends TestCase
         $num = $actual->exec();
         $this->assertEquals($num, 1);
     }
+
+    public function test111()
+    {
+        $actual = Db::create()->sqlBuilder()
+            ->select('*')
+            ->from('master', 'm')
+            ->join('test', 't')
+            ->on('m.id', 't.id');
+
+        $this->assertEquals($actual->fetchAll(), Db::create()->query('select * from master m inner join test t ON m.id = t.id')->fetchAll());
+
+    }
 }
