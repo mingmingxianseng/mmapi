@@ -162,6 +162,7 @@ class QueryBuilder
                 list($filedA, $filedB, $exp, $logic) = $condition;
                 if ($first) {
                     $sql .= " ON {$filedA} {$exp} {$filedB}";
+                    $first = false;
                 } else {
                     $sql .= " {$logic} {$filedA} {$exp} {$filedB}";
                 }

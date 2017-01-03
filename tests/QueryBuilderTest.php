@@ -253,6 +253,13 @@ class QueryBuilderTest extends TestCase
             ->on('m.id', 't.id');
 
         $this->assertEquals($actual->fetchAll(), Db::create()->query('select * from master m inner join test t ON m.id = t.id')->fetchAll());
+        $actual = Db::create()->sqlBuilder()
+            ->select('*')
+            ->from('master', 'm')
+            ->join('test', 't')
+            ->on('m.id', 't.id')
+            ->on('m.id','t.id+1','=','or');
 
+        $this->assertEquals($actual->fetchAll(), Db::create()->query('select * from `master` m inner join test t ON m.id = t.id or m.id=t.id+1')->fetchAll());
     }
 }
