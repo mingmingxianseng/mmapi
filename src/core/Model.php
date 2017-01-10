@@ -15,18 +15,16 @@ abstract class Model
     private $entityClass;
 
     /**
-     * @desc   getInstance
+     * @desc   getInstance 获取一个实例
      * @author chenmingming
      *
-     * @param $id
+     * @param string $id 主键id
      *
      * @return object
      */
     static public function getInstance($id)
     {
-        $class = get_called_class();
-
-        return Db::create($class::DB_INI)->find($class, $id);
+        return Db::create(static::DB_INI)->find(static::class, $id);
     }
 
     /**
@@ -36,9 +34,7 @@ abstract class Model
      */
     static function getRepository()
     {
-        $class = get_called_class();
-
-        return Db::create($class::DB_INI)->getEntityManager()->getRepository($class);
+        return Db::create(static::DB_INI)->getEntityManager()->getRepository(static::class);
     }
 
     /**
@@ -74,6 +70,11 @@ abstract class Model
         return $this->db;
     }
 
+    /**
+     * @desc   getEntityClass 获取当前实例的类名称
+     * @author chenmingming
+     * @return string
+     */
     public function getEntityClass()
     {
         if (is_null($this->entityClass)) {
@@ -81,5 +82,34 @@ abstract class Model
         }
 
         return $this->entityClass;
+    }
+
+    /**
+     * @desc   tryInstance 尝试获取一个对象
+     * @author chenmingming
+     *
+     * @param  string                 $id 对象主键id
+     * @param \Exception|array|string $e  若该对象不存在抛出的异常
+     *
+     * @return object
+     * @throws \Exception 对象不存在抛出异常
+     */
+    static public function tryInstance($id, $e)
+    {
+
+        $instance = Db::create(static::DB_INI)->find(static::class, $id);
+        if (is_null($instance)) {
+            if ($e instanceof \Exception) {
+                throw $e;
+            } elseif (is_array($e)) {
+                throw new AppException($e);
+            } else {
+                $e = $e ?: 'CLASS ' . static::class . ' NOT FUND';
+                throw new AppException($e, static::class . '@NOT_FUND');
+            }
+
+        }
+
+        return $instance;
     }
 }

@@ -52,7 +52,6 @@ class Db
         }
         $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $memcache);
         $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));
-
         $config->setSQLLogger(new SqlLog());
         try {
             $this->entityManager = EntityManager::create($this->options['conn'], $config);

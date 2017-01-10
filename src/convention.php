@@ -7,6 +7,7 @@
  */
 return [
     'response'         => [
+        'content_type'   => 'application/json; charset=utf-8',
         'default_code'   => 'SUCCESS',
         'default_msg'    => 'SUCCESS',
         'default_errno'  => 'SYSTEM_ERROR',

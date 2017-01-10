@@ -43,8 +43,6 @@ class Response
         $this->options = array_merge($this->options, is_array($options) ? $options : []);
         $this->set('code', Config::get('response.default_code', 'SUCCESS'));
         $this->set('msg', Config::get('response.default_msg', 'SUCCESS'));
-
-        $this->header('Content-Type', 'application/json; charset=utf-8');
     }
 
     /**
@@ -92,6 +90,7 @@ class Response
         if (!headers_sent() && !empty($this->header)) {
             // 发送状态码
             http_response_code($this->code);
+            $this->header('Content-Type', $this->options['content_type']);
             // 发送头部信息
             foreach ($this->header as $name => $val) {
                 header($name . ':' . $val);
@@ -321,6 +320,21 @@ class Response
         }
 
         return $this->content;
+    }
+
+    /**
+     * @desc   setContent
+     * @author chenmingming
+     *
+     * @param string $string 设置输出内容
+     *
+     * @return $this
+     */
+    public function setContent($string)
+    {
+        $this->content = $string;
+
+        return $this;
     }
 
     /**

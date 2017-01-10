@@ -9,7 +9,11 @@
     ],
     "require": {
         "doctrine/orm": "^2.5",
-        "guzzlehttp/guzzle": "^6.2"
+        "guzzlehttp/guzzle": "^6.2",
+        "monster/wechatpay": "^1.1",
+        "kollway/wechat-pay": "^1.0",
+        "houdunwang/wechat": "^1.0",
+        "lixuancn/lanewechat": "^1.5"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
