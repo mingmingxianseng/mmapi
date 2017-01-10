@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e0420536deebdb5abf47077da35d9e43",
-    "content-hash": "fa6f33fbb330c83237838be57d7a7462",
+    "hash": "62c81e11a5f5345afe307c89c6e4668e",
+    "content-hash": "fb9bf9b672aa7d4f5d6a0eb18422b519",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -778,151 +778,6 @@
             "time": "2016-06-24 23:00:38"
         },
         {
-            "name": "houdunwang/wechat",
-            "version": "v1.0.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/houdunwang/wechat.git",
-                "reference": "bf4d6ee9fef2dc0e0677ed703c19ffe132c0dac0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/houdunwang/wechat/zipball/bf4d6ee9fef2dc0e0677ed703c19ffe132c0dac0",
-                "reference": "bf4d6ee9fef2dc0e0677ed703c19ffe132c0dac0",
-                "shasum": ""
-            },
-            "type": "project",
-            "autoload": {
-                "psr-4": {
-                    "wechat\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "houdunwang",
-                    "email": "2300071698@qq.com"
-                }
-            ],
-            "description": "wechat framework",
-            "time": "2016-11-13 16:08:39"
-        },
-        {
-            "name": "kollway/wechat-pay",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kollway-app/wechat-pay.git",
-                "reference": "927b0ae6403b150e9ad3d362cd5634e15b54fb5e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kollway-app/wechat-pay/zipball/927b0ae6403b150e9ad3d362cd5634e15b54fb5e",
-                "reference": "927b0ae6403b150e9ad3d362cd5634e15b54fb5e",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Kollway\\WechatPay\\": "src/Kollway/WechatPay"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "kollway",
-                    "email": "app@kollway.com"
-                }
-            ],
-            "description": "Laravel Wechat payment library.",
-            "time": "2016-01-11 09:35:37"
-        },
-        {
-            "name": "lixuancn/lanewechat",
-            "version": "v1.5.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/lixuancn/LaneWeChat.git",
-                "reference": "e814a8655f70a774dcfdc8fa8881eeaa2ef9d8bf"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/lixuancn/LaneWeChat/zipball/e814a8655f70a774dcfdc8fa8881eeaa2ef9d8bf",
-                "reference": "e814a8655f70a774dcfdc8fa8881eeaa2ef9d8bf",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE"
-            ],
-            "authors": [
-                {
-                    "name": "Lane/lixuancn",
-                    "email": "lixuan868686@163.com",
-                    "homepage": "http://www.lanecn.com",
-                    "role": "PHP Developer"
-                }
-            ],
-            "description": "LaneWeChat is WeChat development package for PHP,这是一个为快速开发微信应用而生的PHP框架。将微信的开发者功能根据文档进行了封装。为了快速开发的目的，开发者完全不需要要知道具体是如何实现的，只需要简单的调用方法即可",
-            "homepage": "http://lanewechat.lanecn.com",
-            "keywords": [
-                "LaneWeChat",
-                "php",
-                "wechat"
-            ],
-            "time": "2015-10-21 10:20:15"
-        },
-        {
-            "name": "monster/wechatpay",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/twn39/WeChatPay.git",
-                "reference": "0e4253698c1d12bc9327edbce4447e3e1f51bca8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/twn39/WeChatPay/zipball/0e4253698c1d12bc9327edbce4447e3e1f51bca8",
-                "reference": "0e4253698c1d12bc9327edbce4447e3e1f51bca8",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^6.1",
-                "php": ">=5.5.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Monster\\WeChatPay\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "twn39",
-                    "email": "twn39@163.com"
-                }
-            ],
-            "description": "WeChat app payment server side code.",
-            "time": "2016-04-11 02:42:22"
-        },
-        {
             "name": "paragonie/random_compat",
             "version": "v2.0.4",
             "source": {
@@ -1541,29 +1396,30 @@
         },
         {
             "name": "twig/twig",
-            "version": "v1.30.0",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "c6ff71094fde15d12398eaba029434b013dc5e59"
+                "reference": "2a86dde1288d7270169083d0e078dc7ebe0f48b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/c6ff71094fde15d12398eaba029434b013dc5e59",
-                "reference": "c6ff71094fde15d12398eaba029434b013dc5e59",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/2a86dde1288d7270169083d0e078dc7ebe0f48b6",
+                "reference": "2a86dde1288d7270169083d0e078dc7ebe0f48b6",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.2.7"
+                "php": "^7.0",
+                "symfony/polyfill-mbstring": "~1.0"
             },
             "require-dev": {
                 "symfony/debug": "~2.7",
-                "symfony/phpunit-bridge": "~3.2@dev"
+                "symfony/phpunit-bridge": "~3.2"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.30-dev"
+                    "dev-master": "2.0-dev"
                 }
             },
             "autoload": {
@@ -1598,7 +1454,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2016-12-23 11:06:22"
+            "time": "2017-01-05 17:12:02"
         }
     ],
     "packages-dev": [
