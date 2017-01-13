@@ -11,6 +11,7 @@ namespace mmxs\mmapi\tests;
 use mmapi\core\Cache;
 use mmapi\core\Config;
 use mmapi\wechat\cache\CacheProvider;
+use mmapi\wechat\core\UserManage;
 use mmapi\wechat\log\EchologProvider;
 use mmapi\wechat\Wechat;
 use PHPUnit\Framework\TestCase;
@@ -47,16 +48,15 @@ class WechatTest extends TestCase
         ]);
     }
 
-    public function test1()
+    public function testMedia()
     {
-        $rs = Cache::set('test1', '123');
-        $this->assertEquals(Cache::get('test1'), '123');
-        print_r(Config::get('wechat'));
         $wechat = new Wechat(Config::get('wechat'), new CacheProvider());
         $wechat->setLogger(new EchologProvider());
-
-        echo $wechat->getAccessToken();
-
-        $wechat->getInitiativeReponse()->text('22', 'hello');
+        $openid      = 'o-ZuSwW63xq-iDUQFP6pSLKCW6Xw';
+        $userManager = new UserManage($wechat);
+        $data        = $userManager->getGroupByOpenId($openid);
+        print_r($data);
+        $user = $userManager->getUser($openid);
+        $this->assertEquals($openid, $user->getOpenid());
     }
 }

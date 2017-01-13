@@ -8,13 +8,9 @@
 
 namespace mmapi\wechat\core;
 
-use mmapi\wechat\Wechat;
-
 abstract class Request extends ResponsePassive
 {
     protected $request;
-    /** @var  Wechat */
-    protected $wechat;
     static protected $eventMapping = [
         'masssendjobfinish'     => 'eventMassSendJobFinish',
         'scancode_waitmsg'      => 'eventScancodeWaitMsg',
@@ -22,11 +18,6 @@ abstract class Request extends ResponsePassive
         'templatesendjobfinish' => 'eventTemplateSendJobFinish',
     ];
     static protected $clickMapping = [];
-
-    public function __construct(Wechat $wechat)
-    {
-        $this->wechat = $wechat;
-    }
 
     abstract protected function beforeDeal();
 

@@ -8,19 +8,10 @@
 
 namespace mmapi\wechat\core;
 
-use mmapi\wechat\Wechat;
-
-class Oauth
+class Oauth extends Base
 {
     const SCOPE_BASE = 'snsapi_base';
     const SCOPE_INFO = 'snsapi_userinfo';
-    /** @var Wechat $wechat */
-    private $wechat;
-
-    public function __construct(Wechat $wechat)
-    {
-        $this->wechat = $wechat;
-    }
 
     /**
      * Description: 获取CODE
@@ -65,10 +56,13 @@ class Oauth
     {
         //填写为authorization_code
         //构造请求微信接口的URL
-        $url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code';
-        $url = sprintf($url, $this->wechat->getAppid(), $this->wechat->getAppSecret(), $code);
-
-        return $this->wechat->getReponseArray($url);
+        return $this->wechat->getHttp()
+            ->setUrl('https://api.weixin.qq.com/sns/oauth2/access_token')
+            ->setPrameter('appid', $this->wechat->getAppid())
+            ->setPrameter('secret', $this->wechat->getAppSecret())
+            ->setPrameter('code', $code)
+            ->setPrameter('grant_type', 'authorization_code')
+            ->get();
 
     }
 
@@ -87,10 +81,12 @@ class Oauth
      */
     public function refreshToken($refreshToken)
     {
-        $queryUrl = 'https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s';
-        $url      = sprintf($queryUrl, $this->wechat->getAppid(), $refreshToken);
-
-        return $this->wechat->getReponseArray($url);
+        return $this->wechat->getHttp()
+            ->setUrl('https://api.weixin.qq.com/sns/oauth2/refresh_token')
+            ->setPrameter('appid', $this->wechat->getAppid())
+            ->setPrameter('grant_type', 'refresh_token')
+            ->setPrameter('refresh_token', $refreshToken)
+            ->get();
     }
 
     /**
@@ -105,8 +101,13 @@ class Oauth
      */
     public function getUserInfo($accessToken, $openId, $lang = 'zh_CN')
     {
-        $queryUrl = 'https://api.weixin.qq.com/sns/userinfo?access_token=' . $accessToken . '&openid=' . $openId . '&lang=' . $lang;
-        $info     = $this->wechat->getResponseArrayAndCheck($queryUrl);
+        $info = $this->wechat->getHttp()
+            ->setUrl('https://api.weixin.qq.com/sns/userinfo')
+            ->setPrameter('openid', $openId)
+            ->setPrameter('lang', $lang)
+            ->setPrameter('access_token', $accessToken)
+            ->withoutAccessToken()
+            ->get();
 
         return new User($info, $this->wechat);
     }

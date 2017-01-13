@@ -81,7 +81,6 @@ class  App
      */
     static public function handleException($e)
     {
-
         if ($e instanceof AppException) {
             $errno = $e->getErrno();
         } else {
@@ -93,13 +92,14 @@ class  App
         if (!headers_sent() && DEBUG) {
             Response::create()->error($errno, $e->getMessage(), explode("\n", $e->getTraceAsString()));
         }
+
         self::lastLog();
     }
 
     // 致命错误捕获
     static public function fatalError()
     {
-        if ($e = error_get_last() && DEBUG) {
+        if (($e = error_get_last()) && DEBUG) {
             Response::create()->error('fatal_error', $e['message'], $e);
         }
 

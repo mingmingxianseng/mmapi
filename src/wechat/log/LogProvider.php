@@ -15,7 +15,7 @@ class LogProvider implements Log
 {
     public function log($msg, $label)
     {
-        \mmapi\core\Log::info("[{$label}]\t" . var_export($msg, true));
+        \mmapi\core\Log::write("[{$label}]\t" . var_export($msg, true));
     }
 
 }

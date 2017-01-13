@@ -10,8 +10,9 @@ namespace mmapi\wechat\core;
 
 use mmapi\wechat\Wechat;
 
-class User
+class User extends Base
 {
+    protected $subscribe = 0;
     protected $openid;
     protected $nickname;
     protected $sex;
@@ -21,15 +22,30 @@ class User
     protected $headimgurl;
     protected $privilege;
     protected $unionid;
-    /** @var  Wechat $wechat */
-    protected $wechat;
+    protected $remark;
+    protected $subscribe_time;
 
+    /**
+     * User constructor.
+     *
+     * @param array  $data   数组
+     * @param Wechat $wechat 微信对象
+     */
     public function __construct($data, Wechat $wechat)
     {
         foreach ($data as $k => $v) {
             $this->$k = $v;
         }
-        $this->wechat = $wechat;
+        parent::__construct($wechat);
+        $this->wechat->log($data, 'userinfo');
+    }
+
+    /**
+     * @return string
+     */
+    public function getRemark()
+    {
+        return $this->remark;
     }
 
     /**
@@ -105,12 +121,19 @@ class User
     }
 
     /**
-     * @return Wechat
+     * @return bool
      */
-    public function getWechat()
+    public function isSubscribe()
     {
-        return $this->wechat;
+        return $this->subscribe == 1;
     }
-    
-    
+
+    /**
+     * @return int
+     */
+    public function getSubscribeTime()
+    {
+        return $this->subscribe_time;
+    }
+
 }

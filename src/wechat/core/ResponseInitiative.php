@@ -12,24 +12,12 @@ use mmapi\wechat\Wechat;
  * Mail: lixuan868686@163.com
  * Website: http://www.lanecn.com
  */
-class ResponseInitiative
+class ResponseInitiative extends Base
 {
 
     const REQUEST_URL = 'https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=';
 
     protected static $action = 'POST';
-    /** @var  Wechat */
-    protected $wechat;
-
-    /**
-     * ResponseInitiative constructor.
-     *
-     * @param Wechat $wechat 微信对象
-     */
-    public function __construct(Wechat $wechat)
-    {
-        $this->wechat = $wechat;
-    }
 
     /**
      * @descrpition 文本
@@ -213,6 +201,8 @@ class ResponseInitiative
     {
         $this->wechat->log($template, 'reponse-initiative');
 
-        return $this->wechat->postReponseArray(self::REQUEST_URL . $this->wechat->getAccessToken(), json_encode($template));
+        return $this->wechat->getHttp()
+            ->setUrl(self::REQUEST_URL)
+            ->post($template);
     }
 }

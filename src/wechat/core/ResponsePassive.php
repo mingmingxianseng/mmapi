@@ -10,7 +10,7 @@ namespace mmapi\wechat\core;
  * Mail: lixuan868686@163.com
  * Website: http://www.lanecn.com
  */
-abstract class ResponsePassive
+abstract class ResponsePassive extends Base
 {
     protected $fromUserName;
     protected $toUserName;

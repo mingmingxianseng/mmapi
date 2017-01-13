@@ -12,6 +12,7 @@ use Doctrine\Common\Cache\CacheProvider;
 use GuzzleHttp\Client;
 use mmapi\api\LoginApi;
 use mmapi\wechat\core\Cache;
+use mmapi\wechat\core\Http;
 use mmapi\wechat\core\Log;
 use mmapi\wechat\core\Request;
 use mmapi\wechat\core\ResponseInitiative;
@@ -44,7 +45,6 @@ class Wechat
     private $cacheProvider;
     /** @var  Log */
     private $logger;
-
     /** @var ResponseInitiative */
     private $reponseInitiative;
 
@@ -189,8 +189,13 @@ class Wechat
      */
     private function _getAccessToken()
     {
-        $url           = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' . $this->appid . '&secret=' . $this->app_secret;
-        $responseArray = $this->getReponseArray($url);
+        $responseArray = $this->getHttp()
+            ->setUrl('https://api.weixin.qq.com/cgi-bin/token')
+            ->setPrameter('grant_type', 'client_credential')
+            ->setPrameter('appid', $this->appid)
+            ->setPrameter('secret', $this->app_secret)
+            ->withoutAccessToken()
+            ->get();
         if (!isset($responseArray['access_token'])) {
             throw new WechatException("获取access_token失败", 'GET_ACCESS_TOKEN_FAILED', $responseArray);
         }
@@ -215,7 +220,7 @@ class Wechat
      * @author chenmingming
      * @return Client
      */
-    private function getClient()
+    public function getClient()
     {
         if (is_null($this->client)) {
             $this->client = new Client($this->options['client']);
@@ -225,71 +230,13 @@ class Wechat
     }
 
     /**
-     * @desc   getReponseJson
+     * @desc   getHttp
      * @author chenmingming
-     *
-     * @param string $url 要请求的地址
-     *
-     * @return array 返回数组
-     * @throws WechatException
+     * @return Http
      */
-    public function getReponseArray($url)
+    public function getHttp()
     {
-        $this->log($url, 'request-url');
-        $json  = $this->getClient()
-            ->get($url)
-            ->getBody()
-            ->getContents();
-        $array = json_decode($json, true);
-        if (json_last_error()) {
-            throw new WechatException("请求数据异常", 'GET_URL_INVALID', [$url, $json]);
-        }
-
-        return $array;
-    }
-
-    /**
-     * @desc   getResponseArrayAndCheck
-     * @author chenmingming
-     *
-     * @param string $url 请求地址
-     *
-     * @throws WechatException
-     * @return array
-     */
-    public function getResponseArrayAndCheck($url)
-    {
-        $reponse = $this->getReponseArray($url);
-        if ($reponse['errcode'] && $reponse['errmsg']) {
-            throw new WechatException($reponse['errmsg'], $reponse['errcode'], $reponse);
-        }
-
-        return $reponse;
-    }
-
-    /**
-     * @desc   getReponseJson
-     * @author chenmingming
-     *
-     * @param string $url 要请求的地址
-     * @param        string
-     *
-     * @return array 返回数组
-     * @throws WechatException
-     */
-    public function postReponseArray($url, $params)
-    {
-        $this->log($url, 'request-url');
-        $json  = $this->getClient()
-            ->post($url, ['body' => $params])
-            ->getBody()
-            ->getContents();
-        $array = json_decode($json, true);
-        if (json_last_error()) {
-            throw new WechatException("请求数据异常", 'GET_URL_INVALID', [$url, $json]);
-        }
-
-        return $array;
+        return new Http($this);
     }
 
     /**
@@ -338,6 +285,14 @@ class Wechat
         return sha1(implode($signatureArray)) == $signature;
     }
 
+    /**
+     * @desc   listen 监听
+     * @author chenmingming
+     *
+     * @param Request $request 监听对象
+     *
+     * @return string
+     */
     public function listen(Request $request)
     {
         if ($this->validateSignature()) {
