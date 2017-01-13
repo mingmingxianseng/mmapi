@@ -45,16 +45,25 @@ abstract class Api
      */
     abstract public function run();
 
+    /**
+     * @desc   beforeRun
+     * @author chenmingming
+     */
+    protected function beforeRun()
+    {
+        $this->init();
+        $this->parse();
+    }
+
+    /**
+     * @desc   main 主线程
+     * @author chenmingming
+     */
     final public function main()
     {
-        try {
-            $this->run();
-            $this->send();
-        } catch (\Exception $e) {
-            $this->exceptionHandler($e);
-            throw $e;
-        }
-
+        $this->beforeRun();
+        $this->run();
+        $this->send();
     }
 
     /**
@@ -62,18 +71,11 @@ abstract class Api
      */
     public function __construct()
     {
-        try {
-            $this->_start_time = microtime(true);
-            $this->options     = array_merge($this->options, Config::get('api', []));
-            $this->init();
-            $this->parse();
-            $this->set('code', $this->options[self::OPT_DEFAULT_CODE]);
-            $this->set('msg', $this->options[self::OPT_DEFAULT_MSG]);
-        } catch (\Exception $e) {
-            $this->exceptionHandler($e);
-            throw new $e;
-        }
-
+        set_exception_handler([$this, 'exceptionHandler']);
+        $this->_start_time = microtime(true);
+        $this->options     = array_merge($this->options, Config::get('api', []));
+        $this->set('code', $this->options[self::OPT_DEFAULT_CODE]);
+        $this->set('msg', $this->options[self::OPT_DEFAULT_MSG]);
     }
 
     /**
@@ -96,15 +98,17 @@ abstract class Api
      */
     public function exceptionHandler(\Exception $e)
     {
-        $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
-
-        if ($this->options[self::OPT_DEBUG]) {
-            $this->set('exception', get_class($e))
+        if ($this->getOption(self::OPT_DEBUG)) {
+            $this
+                ->set('exception', get_class($e))
                 ->set('trace', explode("\n", $e->getTraceAsString()));
-            method_exists($e, 'getDetail') && $this->set('detail', $e->getDetail());
-
+            method_exists($e, 'getDetail')
+            &&
+            $this->set('detail', $e->getDetail());
         }
+        $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
         $this->error($e->getMessage(), $errno);
+        App::handleException($e);
     }
 
     /**
@@ -275,6 +279,19 @@ abstract class Api
     public function option($key, $value)
     {
         $this->options[$key] = $value;
+    }
+
+    /**
+     * @desc   getOption
+     * @author chenmingming
+     *
+     * @param string $key key
+     *
+     * @return mixed
+     */
+    public function getOption($key)
+    {
+        return $this->options[$key];
     }
 
     /**

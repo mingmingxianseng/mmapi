@@ -19,7 +19,6 @@ class  App
         set_exception_handler('mmapi\core\App::handleException');
         register_shutdown_function('mmapi\core\App::fatalError');
         set_error_handler('mmapi\core\App::appError');
-
         define('REQUEST_ID', uniqid());
         define('START_TIME', microtime(true));
 
@@ -29,6 +28,7 @@ class  App
         if (!Config::get('vpath')) {
             throw new AppException("VPATH can't be empty!", 'VPATH_EMPTY');
         }
+
         define('VPATH', Config::get('vpath'));
         //定义是否AJAX请求
         define('IS_AJAX',
@@ -41,9 +41,9 @@ class  App
             . ($_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR'])
             . $_SERVER['REQUEST_URI']
         );
-        self::loadConf();
 
-        define('DEBUG', Config::get('debug') == true);
+        self::loadConf();
+        defined('DEBUG') || define('DEBUG', Config::get('debug') == true);
 
         Dispatcher::dispatch();
     }
@@ -56,6 +56,7 @@ class  App
     {
         //加载默认配置文件
         $default_conf_path = dirname(__DIR__) . '/convention.php';
+
         is_file($default_conf_path) && Config::batchSet(include $default_conf_path);
         //加载配置文件
         $conf_path = Config::get('conf_path', VPATH . '/conf');
@@ -69,7 +70,6 @@ class  App
             $file = CONF_PATH . '/' . $file;
             is_file($file) and Config::batchSet(include $file);
         }
-
     }
 
     /**
@@ -86,9 +86,10 @@ class  App
         } else {
             $errno = $e->getCode();
         }
-        Log::error("[{$errno}]:{$e->getMessage()}");
-        Log::error("trace:\r\n" . var_export(explode("\n", $e->getTraceAsString()), true));
-
+        if (!in_array(get_class($e), Config::get('no_logged_exception'))) {
+            Log::error("[{$errno}]:{$e->getMessage()}");
+            Log::error("trace:\r\n" . var_export(explode("\n", $e->getTraceAsString()), true));
+        }
         if (!headers_sent() && DEBUG) {
             Response::create()->error($errno, $e->getMessage(), explode("\n", $e->getTraceAsString()));
         }
@@ -102,10 +103,15 @@ class  App
         if (($e = error_get_last()) && DEBUG) {
             Response::create()->error('fatal_error', $e['message'], $e);
         }
+        $e && Log::error($e);
 
         self::lastLog();
     }
 
+    /**
+     * @desc   lastLog
+     * @author chenmingming
+     */
     static private function lastLog()
     {
         $file_load  = ' [File loaded：' . count(get_included_files()) . ']';

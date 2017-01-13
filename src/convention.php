@@ -6,8 +6,7 @@
  * Time: 23:33
  */
 return [
-    'response'         => [
-        'content_type'   => 'application/json; charset=utf-8',
+    'response'            => [
         'default_code'   => 'SUCCESS',
         'default_msg'    => 'SUCCESS',
         'default_errno'  => 'SYSTEM_ERROR',
@@ -15,16 +14,22 @@ return [
         'header'         => [
             'Request-Id' => REQUEST_ID,
         ],
-        'options'        => [],
+        'options'        => [
+            'content_type' => 'application/json; charset=utf-8',
+        ],
     ],
     //路由配置
-    'dispatcher'       => [
+    'dispatcher'          => [
         'layer'          => 's',
         'default_action' => 'index',
         'namespace'      => 'app',
     ],
-    'error_reportiong' => E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED & ~E_WARNING,
-    'cache'            => [
+    'error_reportiong'    => E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED & ~E_WARNING,
+    //不需要记录的异常
+    'no_logged_exception' => [
+        \mmapi\api\ApiException::class,
+    ],
+    'cache'               => [
         'type'          => 'memached',
         'expire'        => 0,
         'cache_subdir'  => false,
@@ -32,7 +37,7 @@ return [
         'path'          => VPATH,
         'data_compress' => false,
     ],
-    'log'              => [
+    'log'                 => [
         //开关
         'status'      => true,
         //时间格式
