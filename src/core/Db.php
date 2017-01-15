@@ -19,7 +19,6 @@ use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use mmapi\cache\DbCache;
-use mmapi\cache\driver\Memcached;
 
 class Db
 {
@@ -48,7 +47,7 @@ class Db
         if ($cache) {
             /** @var \Memcached $handler */
             $handler = $cache->handler();
-            $handler instanceof Memcached && $memcache = new DbCache($handler);
+            ($handler instanceof \Memcached) && $memcache = new DbCache($handler);
         }
         $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $memcache);
         $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));

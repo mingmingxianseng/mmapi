@@ -135,16 +135,32 @@ class Memcached extends Driver
      *
      * @access public
      *
-     * @param string $name 缓存变量名
-     * @param int    $step 步长
+     * @param string $name   缓存变量名
+     * @param int    $step   步长
+     * @param int    $expire 有效时间 0为永久
      *
      * @return false|int
      */
-    public function inc($name, $step = 1)
+    public function inc($name, $step = 1, $expire = null)
     {
         $key = $this->getCacheKey($name);
 
-        return $this->handler->increment($key, $step);
+        $rs = $this->handler->increment($key, $step);
+        if (false === $rs) {
+            //无值
+            $rs = $this->handler->add($key, 1, $expire);
+            if ($rs) {
+                return 1;
+            } else {
+                if (is_numeric($this->handler->get($key))) {
+                    return $this->inc($name, $step, $expire);
+                }
+
+                return false;
+            }
+        }
+
+        return $rs;
     }
 
     /**
@@ -159,14 +175,9 @@ class Memcached extends Driver
      */
     public function dec($name, $step = 1)
     {
-        $key   = $this->getCacheKey($name);
-        $value = $this->handler->get($key) - $step;
-        $res   = $this->handler->set($key, $value);
-        if (!$res) {
-            return false;
-        } else {
-            return $value;
-        }
+        $key = $this->getCacheKey($name);
+
+        return $this->handler->decrement($key, $step);
     }
 
     /**

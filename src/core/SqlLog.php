@@ -17,6 +17,7 @@ class SqlLog implements SQLLogger
 
     static protected $num = 0;
     protected $start_time;
+    protected $sql;
 
     /**
      * @desc   getCount 获取sql执行数量
@@ -41,7 +42,7 @@ class SqlLog implements SQLLogger
             $sql = str_replace(['?'], '"%s"', $sql);
             $sql = vsprintf($sql, $this->normalizeParams($params));
         }
-        Log::sql($sql);
+        $this->sql = $sql;
     }
 
     /**
@@ -49,7 +50,7 @@ class SqlLog implements SQLLogger
      */
     public function stopQuery()
     {
-        Log::sql(sprintf('[Exec: %.6f s]', microtime(true) - $this->start_time));
+        Log::sql(sprintf('%s [Exec: %.6f s]', $this->sql, microtime(true) - $this->start_time));
     }
 
     /**

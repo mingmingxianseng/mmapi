@@ -52,9 +52,10 @@ abstract class Driver
      * @access public
      * @param string    $name 缓存变量名
      * @param int       $step 步长
+     * @param int       $expire  有效时间 0为永久
      * @return false|int
      */
-    abstract public function inc($name, $step = 1);
+    abstract public function inc($name, $step = 1,$expire=null);
 
     /**
      * 自减缓存（针对数值缓存）
@@ -200,7 +201,7 @@ abstract class Driver
      * 返回句柄对象，可执行其它高级方法
      *
      * @access public
-     * @return $this
+     * @return mixed
      */
     public function handler()
     {

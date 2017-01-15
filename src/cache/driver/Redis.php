@@ -18,6 +18,7 @@ use mmapi\cache\Driver;
  * 有需要在业务层实现读写分离、或者使用RedisCluster的需求，请使用Redisd驱动
  *
  * 要求安装phpredis扩展：https://github.com/nicolasff/phpredis
+ *
  * @author    尘缘 <130775@qq.com>
  */
 class Redis extends Driver
@@ -35,7 +36,9 @@ class Redis extends Driver
 
     /**
      * 架构函数
+     *
      * @param array $options 缓存参数
+     *
      * @access public
      */
     public function __construct($options = [])
@@ -61,8 +64,11 @@ class Redis extends Driver
 
     /**
      * 判断缓存
+     *
      * @access public
+     *
      * @param string $name 缓存变量名
+     *
      * @return bool
      */
     public function has($name)
@@ -72,9 +78,12 @@ class Redis extends Driver
 
     /**
      * 读取缓存
+     *
      * @access public
-     * @param string $name 缓存变量名
+     *
+     * @param string $name    缓存变量名
      * @param mixed  $default 默认值
+     *
      * @return mixed
      */
     public function get($name, $default = false)
@@ -84,16 +93,20 @@ class Redis extends Driver
             return $default;
         }
         $jsonData = json_decode($value, true);
+
         // 检测是否为JSON数据 true 返回JSON解析数组, false返回源数据 byron sampson<xiaobo.sun@qq.com>
         return (null === $jsonData) ? $value : $jsonData;
     }
 
     /**
      * 写入缓存
+     *
      * @access public
-     * @param string    $name 缓存变量名
-     * @param mixed     $value  存储数据
-     * @param integer   $expire  有效时间（秒）
+     *
+     * @param string  $name   缓存变量名
+     * @param mixed   $value  存储数据
+     * @param integer $expire 有效时间（秒）
+     *
      * @return boolean
      */
     public function set($name, $value, $expire = null)
@@ -113,39 +126,52 @@ class Redis extends Driver
             $result = $this->handler->set($key, $value);
         }
         isset($first) && $this->setTagItem($key);
+
         return $result;
     }
 
     /**
      * 自增缓存（针对数值缓存）
+     *
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     *
+     * @param string $name   缓存变量名
+     * @param int    $step   步长
+     * @param int    $expire 过期时间
+     *
      * @return false|int
      */
-    public function inc($name, $step = 1)
+    public function inc($name, $step = 1, $expire = null)
     {
         $key = $this->getCacheKey($name);
+
         return $this->handler->incrBy($key, $step);
     }
 
     /**
      * 自减缓存（针对数值缓存）
+     *
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     *
+     * @param string $name 缓存变量名
+     * @param int    $step 步长
+     *
      * @return false|int
      */
     public function dec($name, $step = 1)
     {
         $key = $this->getCacheKey($name);
+
         return $this->handler->decrBy($key, $step);
     }
 
     /**
      * 删除缓存
+     *
      * @access public
+     *
      * @param string $name 缓存变量名
+     *
      * @return boolean
      */
     public function rm($name)
@@ -155,8 +181,11 @@ class Redis extends Driver
 
     /**
      * 清除缓存
+     *
      * @access public
+     *
      * @param string $tag 标签名
+     *
      * @return boolean
      */
     public function clear($tag = null)
@@ -168,8 +197,10 @@ class Redis extends Driver
                 $this->handler->delete($key);
             }
             $this->rm('tag_' . md5($tag));
+
             return true;
         }
+
         return $this->handler->flushDB();
     }
 

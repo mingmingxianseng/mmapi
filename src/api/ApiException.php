@@ -12,5 +12,8 @@ use mmapi\core\AppException;
 
 class ApiException extends AppException
 {
-
+    public function __construct($msg, $errno = 'BUSINESS_ERROR', array $detail = [])
+    {
+        parent::__construct($msg, $errno, $detail);
+    }
 }

@@ -159,17 +159,18 @@ class Cache
      *
      * @access public
      *
-     * @param string $name 缓存变量名
-     * @param int    $step 步长
+     * @param string $name   缓存变量名
+     * @param int    $step   步长
+     * @param int    $expire 过期时间
      *
      * @return false|int
      */
-    public static function inc($name, $step = 1)
+    public static function inc($name, $step = 1, $expire = null)
     {
         self::init();
         self::$writeTimes++;
 
-        return self::$handler->inc($name, $step);
+        return self::$handler->inc($name, $step, $expire);
     }
 
     /**

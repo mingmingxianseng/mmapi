@@ -15,6 +15,7 @@ use mmapi\cache\Driver;
 
 /**
  * 文件类型缓存类
+ *
  * @author    liu21st <liu21st@gmail.com>
  */
 class Lite extends Driver
@@ -27,6 +28,7 @@ class Lite extends Driver
 
     /**
      * 架构函数
+     *
      * @access public
      *
      * @param array $options
@@ -44,8 +46,11 @@ class Lite extends Driver
 
     /**
      * 取得变量的存储文件名
+     *
      * @access protected
+     *
      * @param string $name 缓存变量名
+     *
      * @return string
      */
     protected function getCacheKey($name)
@@ -55,8 +60,11 @@ class Lite extends Driver
 
     /**
      * 判断缓存是否存在
+     *
      * @access public
+     *
      * @param string $name 缓存变量名
+     *
      * @return mixed
      */
     public function has($name)
@@ -66,9 +74,12 @@ class Lite extends Driver
 
     /**
      * 读取缓存
+     *
      * @access public
-     * @param string $name 缓存变量名
+     *
+     * @param string $name    缓存变量名
      * @param mixed  $default 默认值
+     *
      * @return mixed
      */
     public function get($name, $default = false)
@@ -80,8 +91,10 @@ class Lite extends Driver
             if ($mtime < $_SERVER['REQUEST_TIME']) {
                 // 清除已经过期的文件
                 unlink($filename);
+
                 return $default;
             }
+
             return include $filename;
         } else {
             return $default;
@@ -90,10 +103,13 @@ class Lite extends Driver
 
     /**
      * 写入缓存
+     *
      * @access   public
-     * @param string    $name  缓存变量名
-     * @param mixed     $value 存储数据
-     * @param int       $expire 有效时间 0为永久
+     *
+     * @param string $name   缓存变量名
+     * @param mixed  $value  存储数据
+     * @param int    $expire 有效时间 0为永久
+     *
      * @return bool
      */
     public function set($name, $value, $expire = null)
@@ -115,31 +131,40 @@ class Lite extends Driver
             isset($first) && $this->setTagItem($filename);
             touch($filename, $_SERVER['REQUEST_TIME'] + $expire);
         }
+
         return $ret;
     }
 
     /**
      * 自增缓存（针对数值缓存）
+     *
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     *
+     * @param string $name   缓存变量名
+     * @param int    $step   步长
+     * @param int    $expire 过期时间
+     *
      * @return false|int
      */
-    public function inc($name, $step = 1)
+    public function inc($name, $step = 1, $expire = null)
     {
         if ($this->has($name)) {
             $value = $this->get($name) + $step;
         } else {
             $value = $step;
         }
-        return $this->set($name, $value, 0) ? $value : false;
+
+        return $this->set($name, $value, $expire) ? $value : false;
     }
 
     /**
      * 自减缓存（针对数值缓存）
+     *
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     *
+     * @param string $name 缓存变量名
+     * @param int    $step 步长
+     *
      * @return false|int
      */
     public function dec($name, $step = 1)
@@ -149,13 +174,17 @@ class Lite extends Driver
         } else {
             $value = $step;
         }
+
         return $this->set($name, $value, 0) ? $value : false;
     }
 
     /**
      * 删除缓存
+     *
      * @access public
+     *
      * @param string $name 缓存变量名
+     *
      * @return boolean
      */
     public function rm($name)
@@ -165,8 +194,11 @@ class Lite extends Driver
 
     /**
      * 清除缓存
+     *
      * @access   public
+     *
      * @param string $tag 标签名
+     *
      * @return bool
      */
     public function clear($tag = null)
@@ -178,6 +210,7 @@ class Lite extends Driver
                 unlink($key);
             }
             $this->rm('tag_' . md5($tag));
+
             return true;
         }
         array_map("unlink", glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . DIRECTORY_SEPARATOR : '') . '*.php'));
