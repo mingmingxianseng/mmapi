@@ -112,7 +112,7 @@ class ApiParams implements Params
     public function setKey($key)
     {
         if (!preg_match('/^[a-zA-Z][a-zA-Z_0-9]*$/', $key)) {
-            throw new AppException(['接口参数名称非法', 'API_PARAMS_INVALID']);
+            throw new AppException('接口参数名称非法', 'API_PARAMS_INVALID');
         }
         $this->key = $key;
 

@@ -29,7 +29,7 @@ abstract class SignApi extends Api
         parent::__construct();
         if (!$this->options[self::OPT_WITHOUT_CHECK_SIGN] && $this->makeSign() != $this->get('sign')->getValue()) {
             $this->error('签名错误', 'SIGNATURE_ERROR');
-        }
+        } 
     }
 
     /**

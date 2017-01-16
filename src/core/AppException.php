@@ -21,10 +21,12 @@ class AppException extends \Exception
      */
     public function __construct($msg, $errno = 'ERROR', $detail = [])
     {
+
         if (is_array($msg)) {
             list($msg, $errno, $detail) = $msg;
         }
         $this->errno  = strtoupper($errno);
+ 
         $this->detail = $detail;
         parent::__construct((string)$msg, (int)$errno);
     }

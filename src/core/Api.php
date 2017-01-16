@@ -95,7 +95,8 @@ abstract class Api implements Params
     {
         set_exception_handler([$this, 'exceptionHandler']);
         $this->_start_time = microtime(true);
-        $this->options     = array_merge($this->options, Config::get('api', []));
+        $this->beforeRun();
+        $this->options = array_merge($this->options, Config::get('api', []));
     }
 
     /**

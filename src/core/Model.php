@@ -112,4 +112,5 @@ abstract class Model
 
         return $instance;
     }
+    
 }
