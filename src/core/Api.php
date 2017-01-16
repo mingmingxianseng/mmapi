@@ -9,9 +9,8 @@
 namespace mmapi\core;
 
 use mmapi\api\ApiException;
-use Prophecy\Argument\Token\LogicalAndToken;
 
-abstract class Api
+abstract class Api implements Params
 {
     //是否开始调试
     const OPT_DEBUG = 'debug';
@@ -43,11 +42,6 @@ abstract class Api
 
     /** @var ApiParams[] */
     protected $params = [];
-
-    /**
-     * @var array 调试信息
-     */
-    private $debug = [];
 
     /**
      * @var array 接口返回数据数组
@@ -452,4 +446,12 @@ abstract class Api
         ], $this->options[self::OPT_DENY_RESUBMIT]);
     }
 
+    /**
+     * @desc   denyResubmit
+     * @author chenmingming
+     */
+    protected function denyResubmit()
+    {
+        $this->initResubmit();
+    }
 }

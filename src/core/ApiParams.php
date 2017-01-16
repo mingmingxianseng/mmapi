@@ -8,32 +8,11 @@
 
 namespace mmapi\core;
 
-class ApiParams
+use mmapi\api\ApiException;
+
+class ApiParams implements Params
 {
-    //参数类型
-    //整形
-    const TYPE_INT = 'int';
-    //字符串类型
-    const TYPE_STRING = 'string';
-    //浮点型
-    const TYPE_FLOAT = 'float';
-    //json格式
-    const TYPE_JSON = 'json';
 
-    //array 数组
-    const TYPE_ARRAY = 'array';
-
-    const METHOD_GET = 'get';
-    const METHOD_POST = 'post';
-    //get post 均可
-    const METHOD_REQUEST = 'request';
-    const METHOD_COOKIE = 'cookie';
-
-    const VALIDATE_TYPE_COMMON = 'common';//一般验证
-    const VALIDATE_TYPE_REG = 'reg';//正则验证
-    const VALIDATE_TYPE_IN = 'in';//在范围里
-
-    //参数key名称 a-z
     protected $key = '';
     //参数传递方式
     protected $method = self::METHOD_REQUEST;
@@ -51,6 +30,14 @@ class ApiParams
     protected $value;
 
     /**
+     * @var array 异常
+     */
+    protected $exception = [
+        'require'  => null,
+        'validate' => null,
+    ];
+
+    /**
      * ApiParams constructor. 构造函数
      *
      * @param string $key  参数名称
@@ -66,8 +53,8 @@ class ApiParams
      * @desc   create
      * @author chenmingming
      *
-     * @param        $key
-     * @param string $type
+     * @param string $key  key
+     * @param string $type 类型
      *
      * @return ApiParams
      */
@@ -174,13 +161,17 @@ class ApiParams
     }
 
     /**
-     * @param boolean $is_require 设置参数是否必传
+     * @param boolean|\Exception|array $exception 设置参数是否必传 false 非必传 true 必传 其他则为异常
      *
      * @return ApiParams
      */
-    public function setRequire($is_require)
+    public function setRequire($exception)
     {
-        $this->is_require = $is_require;
+        if ($exception === false) {
+            $this->is_require = false;
+        }
+        if (!is_bool($exception))
+            $this->setRequireException($exception);
 
         return $this;
     }
@@ -270,7 +261,8 @@ class ApiParams
         $this->searchValue();
         if (is_null($this->value)) {
             if ($this->isRequire()) {
-                throw new AppException("参数{$this->key}必须传递，且不能为空 方式:{$this->method}", 'API_PARAM_MUST');
+                $this->specialException('require');
+                throw new ApiException("参数{$this->key}必须传递，且不能为空 方式:{$this->method}", 'API_PARAM_MUST');
             }
             is_null($this->default) || $this->value = $this->default;
         } else {
@@ -282,7 +274,7 @@ class ApiParams
     /**
      * @desc   formatValue 格式化值
      * @author chenmingming
-     * @throws AppException
+     * @throws ApiException
      */
     private function formatValue()
     {
@@ -291,31 +283,31 @@ class ApiParams
                 $this->value = (string)$this->value;
                 break;
             case self::TYPE_INT:
-                if ($this->value != (string)(int)$this->value) {
-                    throw new AppException("参数{$this->key}:{$this->value} 非整数", 'APIPARAM_NOT_INT');
-                }
                 $this->value = (int)$this->value;
                 break;
             case self::TYPE_FLOAT:
 
                 if (!Validate::isFloat($this->value)) {
-                    throw new AppException("参数{$this->key}:{$this->value}非浮点数", 'APIPARAM_NOT_FLOAT');
+                    $this->specialException('validate');
+                    throw new ApiException("参数{$this->key}:{$this->value}非浮点数", 'APIPARAM_NOT_FLOAT');
                 }
                 $this->value = (float)$this->value;
                 break;
             case self::TYPE_JSON:
                 json_decode($this->value);
                 if (json_last_error() != JSON_ERROR_NONE) {
-                    throw new AppException("参数{$this->key}:{$this->value}非json字符串", 'APIPARAM_NOT_JSON');
+                    $this->specialException('validate');
+                    throw new ApiException("参数{$this->key}:{$this->value}非json字符串", 'APIPARAM_NOT_JSON');
                 }
                 break;
             case self::TYPE_ARRAY:
                 if (!is_array($this->value)) {
-                    throw new AppException("参数{$this->key}:{$this->value}非数组", 'APIPARAM_NOT_ARRAY');
+                    $this->specialException('validate');
+                    throw new ApiException("参数{$this->key}:{$this->value}非数组", 'APIPARAM_NOT_ARRAY');
                 }
                 break;
             default:
-                throw new AppException("非法的参数类型", 'APIPARAM_INVALID');
+                throw new ApiException("非法的参数类型", 'APIPARAM_INVALID');
         }
     }
 
@@ -354,12 +346,14 @@ class ApiParams
             default:
                 return false;
         }
+
+        return true;
     }
 
     /**
      * @desc   validate 验证参数合法性
      * @author chenmingming
-     * @throws AppException
+     * @throws ApiException
      */
     private function validate()
     {
@@ -367,19 +361,21 @@ class ApiParams
         switch ($this->validate_type) {
             case self::VALIDATE_TYPE_COMMON:
                 if (method_exists(Validate::class, $value) && Validate::$value($this->value) === false) {
-                    throw new AppException("{$this->key}:{$this->value} 简单验证不合法", 'VALIDATE_COMMON_INVALID');
+                    $this->specialException('validate');
+                    throw new ApiException("{$this->key}:{$this->value} 简单验证不合法", 'VALIDATE_COMMON_INVALID');
                 }
                 break;
             case self::VALIDATE_TYPE_IN:
 
                 if (!in_array($this->value, $value)) {
-                    throw new AppException("{$this->value} 不在合法范围内...", 'VALIDATE_NOT_IN_VALID');
+                    $this->specialException('validate');
+                    throw new ApiException("{$this->value} 不在合法范围内...", 'VALIDATE_NOT_IN_VALID');
                 }
                 break;
             case self::VALIDATE_TYPE_REG:
-
                 if (!preg_match($value, $this->value)) {
-                    throw new AppException("{$this->value} 正则验证失败...", 'VALIDATE_REG_INVALID');
+                    $this->specialException('validate');
+                    throw new ApiException("{$this->value} 正则验证失败...", 'VALIDATE_REG_INVALID');
                 }
                 break;
             default:
@@ -405,5 +401,64 @@ class ApiParams
     public function __toString()
     {
         return $this->value;
+    }
+
+    /**
+     * @desc   setRequireException
+     * @author chenmingming
+     *
+     * @param array|\Exception $exception 异常
+     *
+     * @return $this
+     */
+    public function setRequireException($exception)
+    {
+        $this->setException($exception, 'require');
+
+        return $this;
+    }
+
+    /**
+     * @desc   setValidateException
+     * @author chenmingming
+     *
+     * @param array|\Exception $exception 异常
+     *
+     * @return $this
+     */
+    public function setValidateException($exception)
+    {
+        $this->setException($exception, 'validate');
+
+        return $this;
+    }
+
+    /**
+     * @desc   setException 设置异常
+     * @author chenmingming
+     *
+     * @param array|\Exception $exception 异常
+     * @param string           $type      异常类型
+     */
+    protected function setException($exception, $type)
+    {
+        if ($exception instanceof \Exception) {
+            $this->exception[$type] = $exception;
+        } else {
+            $this->exception[$type] = new ApiException($exception);
+        }
+    }
+
+    /**
+     * @desc   getException 获取异常
+     * @author chenmingming
+     *
+     * @param string $type 异常类型
+     */
+    protected function specialException($type)
+    {
+        if (isset($this->exception[$type]) && $this->exception[$type] instanceof \Exception) {
+            throw $this->exception[$type];
+        }
     }
 }
