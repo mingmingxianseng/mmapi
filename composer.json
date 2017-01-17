@@ -1,6 +1,7 @@
 {
     "name": "mmxs/mmapi",
     "description": "frameworkphp",
+    "version":"3.6.5",
     "authors": [
         {
             "name": "chenmingming",
