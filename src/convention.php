@@ -15,7 +15,6 @@ return [
             'Request-Id' => REQUEST_ID,
         ],
         'options'        => [
-            'content_type' => 'application/json; charset=utf-8',
         ],
     ],
     //路由配置

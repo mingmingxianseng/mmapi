@@ -12,7 +12,7 @@ use mmapi\core\Api;
 use mmapi\core\AppException;
 use mmapi\core\Log;
 
-abstract class LoginApi extends Api
+abstract class LoginApi extends DenyResubmitApi
 {
     //是否需要登录的标志
     const OPT_VERIFY_LOGGED = 'is_check_login';

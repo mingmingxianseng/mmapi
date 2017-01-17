@@ -11,9 +11,8 @@
 
 namespace mmapi\core;
 
-class Response
+abstract class Response
 {
-
     // 原始数据
     protected $data = [];
 
@@ -21,28 +20,27 @@ class Response
     protected $code = 200;
 
     // 输出参数
-    protected $options = [
-        'json_encode_param' => JSON_UNESCAPED_UNICODE,
-    ];
+    protected $options = [];
     // header参数
     protected $header = [];
 
     protected $content = null;
-    static protected $instance;
+
+    /**
+     * @var
+     */
+    static private $instance;
 
     /**
      * 架构函数
      *
      * @access   public
      *
+     * @param array $options 配置
      */
-    public function __construct()
+    public function __construct($options = [])
     {
-        $this->header  = Config::get('response.header');
-        $options       = Config::get('response.options', []);
-        $this->options = array_merge($this->options, is_array($options) ? $options : []);
-        $this->set('code', Config::get('response.default_code', 'SUCCESS'));
-        $this->set('msg', Config::get('response.default_msg', 'SUCCESS'));
+        $this->options($options);
     }
 
     /**
@@ -50,33 +48,44 @@ class Response
      *
      * @access public
      *
+     * @param string $type 响应类型
      *
      * @return Response
+     * @throws AppException
      */
-    public static function create()
+    public static function create($type = null)
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new static();
+        is_null($type) && $type = Config::get('response.type', 'json');
+
+        if (is_null(self::$instance[$type])) {
+            $class = "mmapi\\response\\" . ucfirst($type);
+            if (class_exists($class)) {
+                self::$instance[$type] = new $class(Config::get('response'));
+            } else {
+                throw new AppException($class . ' MISSING ', 'RESPONSE_CLASS_MISSING');
+            }
         }
 
-        return self::$instance;
+        return self::$instance[$type];
     }
 
     /**
      * @desc   error 错误输出
      * @author chenmingming
      *
-     * @param string     $errno 错误码
      * @param string     $msg   错误描述
+     * @param string     $errno 错误码
      * @param array|null $data  错误详情
      */
-    public function error($errno, $msg, $data = null)
-    {
-        $this->set('code', strtoupper($errno))
-            ->set('msg', $msg)
-            ->set('data', $data)
-            ->send();
-    }
+    abstract public function error($msg, $errno, $data = null);
+
+    /**
+     * @desc   exception
+     * @author chenmingming
+     *
+     * @param \Exception $e 异常
+     */
+    abstract public function exception(\Exception $e);
 
     /**
      * 发送数据到客户端
@@ -90,7 +99,6 @@ class Response
         if (!headers_sent() && !empty($this->header)) {
             // 发送状态码
             http_response_code($this->code);
-            $this->header('Content-Type', $this->options['content_type']);
             // 发送头部信息
             foreach ($this->header as $name => $val) {
                 header($name . ':' . $val);
@@ -126,46 +134,12 @@ class Response
      *
      * @access public
      *
-     * @param string $key            key
-     * @param mixed  $value          值
-     * @param bool   $formatToString 是否格式化成字符串
+     * @param string $key   key
+     * @param mixed  $value 值
      *
      * @return $this
      */
-    public function set($key, $value, $formatToString = false)
-    {
-        if (is_null($value)) {
-            unset($this->data[$key]);
-        } else {
-            $this->data[$key] = $formatToString ? $this->formatToString($value) : $value;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @desc   formatToString 所有类型数据格式化成字符串
-     * @author chenmingming
-     *
-     * @param mixed $value 待格式化数据
-     *
-     * @return array|string
-     */
-    private function formatToString($value)
-    {
-        if (is_array($value)) {
-            $tmp = [];
-            foreach ($value as $k => $v) {
-                $tmp[$k] = $this->formatToString($v);
-            }
-
-            return $tmp;
-        } elseif (!is_bool($value)) {
-            return (string)$value;
-        }
-
-        return $value;
-    }
+    abstract public function set($key, $value);
 
     /**
      * 设置响应头
@@ -303,24 +277,17 @@ class Response
     public function getContent()
     {
         if (null == $this->content) {
-            try {
-                // 返回JSON数据格式到客户端 包含状态信息
-                $this->content = json_encode($this->data, $this->options['json_encode_param']);
-
-                if ($this->content === false) {
-                    throw new \InvalidArgumentException(json_last_error_msg());
-                }
-
-            } catch (\Exception $e) {
-                if ($e->getPrevious()) {
-                    throw $e->getPrevious();
-                }
-                throw $e;
-            }
+            $this->parseContent();
         }
 
         return $this->content;
     }
+
+    /**
+     * @desc   parseContent
+     * @author chenmingming
+     */
+    abstract protected function parseContent();
 
     /**
      * @desc   setContent

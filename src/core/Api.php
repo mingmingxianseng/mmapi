@@ -8,9 +8,8 @@
 
 namespace mmapi\core;
 
-use mmapi\api\ApiException;
 
-abstract class Api implements Params
+abstract class Api extends ParseParams
 {
     //是否开始调试
     const OPT_DEBUG = 'debug';
@@ -20,14 +19,7 @@ abstract class Api implements Params
     const OPT_DEFAULT_CODE = 'default_code';
     //接口默认返回提交消息
     const OPT_DEFAULT_MSG = 'default_msg';
-    //阻止重复提交表单 默认关闭 false
-    //key :阻止重复提交的唯一key 为null则对当前请求url进行hash
-    //expire: 阻止重复提交的最大有效期 超过有效期则自动失效 默认2s
-    //code：当验证是重复提交时 产生的错误码
-    //msg:当验证是重复提交时 提交文字内容
-    //cache_key_suffix:队列缓存key前缀 默认 deny_resubmit_
-    // ['key'    => null,'expire' => 2,'code'   => 'SYSTEM_BUSY','msg'    => '系统正在处理中...']
-    const OPT_DENY_RESUBMIT = 'deny_resubmit';
+
 
     //接口请求开始时间
     protected $_start_time;
@@ -35,18 +27,13 @@ abstract class Api implements Params
     protected $options = [
         self::OPT_DEBUG            => false,
         self::OPT_FORMAT_TO_STRING => true,
-        self::OPT_DENY_RESUBMIT    => false,
         self::OPT_DEFAULT_CODE     => 'SUCCESS',
         self::OPT_DEFAULT_MSG      => 'SUCCESS',
     ];
-
-    /** @var ApiParams[] */
-    protected $params = [];
-
     /**
      * @var array 接口返回数据数组
      */
-    private $return = [];
+    protected $return = [];
 
     /**
      * @desc   init 初始化
@@ -71,8 +58,6 @@ abstract class Api implements Params
         $this->init();
         //解析获取参数
         $this->parse();
-        //检查是否重复提交
-        $this->checkResubmit();
         $this->set('code', $this->options[self::OPT_DEFAULT_CODE]);
         $this->set('msg', $this->options[self::OPT_DEFAULT_MSG]);
     }
@@ -95,20 +80,7 @@ abstract class Api implements Params
     {
         set_exception_handler([$this, 'exceptionHandler']);
         $this->_start_time = microtime(true);
-        $this->beforeRun();
-        $this->options = array_merge($this->options, Config::get('api', []));
-    }
-
-    /**
-     * @desc   parse
-     * @author chenmingming
-     */
-    protected function parse()
-    {
-        foreach ($this->params as $param) {
-            $param->parse();
-            $this->setField($param->getKey(), $param->getValue());
-        }
+        $this->options     = array_merge($this->options, Config::get('api', []));
     }
 
     /**
@@ -144,80 +116,6 @@ abstract class Api implements Params
         $this->set('code', $code)
             ->set('msg', $msg)
             ->send();
-    }
-
-    /**
-     * @desc   setParams 设置参数
-     * @author chenmingming
-     *
-     * @param ApiParams|string $param 参数
-     *
-     * @return ApiParams
-     */
-    final public function addParam($param)
-    {
-        if ($param instanceof ApiParams) {
-            $this->params[$param->getKey()] = $param;
-        } else {
-            $this->params[$param] = ApiParams::create($param);
-        }
-
-        return $this->params[$param];
-    }
-
-    /**
-     * @desc   removeParam
-     * @author chenmingming
-     *
-     * @param string $key 参数名称
-     */
-    final public function removeParam($key)
-    {
-        if (isset($this->params[$key])) {
-            unset($this->params[$key]);
-        }
-    }
-
-    /**
-     * @desc   get 获取参数
-     * @author chenmingming
-     *
-     * @param string $key 参数名称
-     *
-     * @return ApiParams|null
-     */
-    final public function get($key)
-    {
-        if (isset($this->params[$key])) {
-            return $this->params[$key];
-        }
-
-        return null;
-    }
-
-    /**
-     * @desc   addParams 批量添加
-     * @author chenmingming
-     *
-     * @param array $params 参数列表
-     */
-    final public function addParams(array $params)
-    {
-        foreach ($params as $param) {
-            $this->addParam($param);
-        }
-    }
-
-    /**
-     * @desc   setField
-     * @author chenmingming
-     *
-     * @param string $field 属性
-     * @param mixed  $value 值
-     */
-    private function setField($field, $value)
-    {
-        $this->$field = $value;
     }
 
     /**
@@ -259,11 +157,10 @@ abstract class Api implements Params
     final private function send()
     {
         $this->beforeResponse();
-        $formatToString = $this->options[self::OPT_FORMAT_TO_STRING] == true;
-
         $response = Response::create();
+        $response->options([self::OPT_FORMAT_TO_STRING => $this->options[self::OPT_FORMAT_TO_STRING]]);
         foreach ($this->return as $key => $value) {
-            $response->set($key, $value, $formatToString);
+            $response->set($key, $value);
         }
         $response->send();
         $this->afterResponse();
@@ -275,7 +172,6 @@ abstract class Api implements Params
      */
     protected function afterResponse()
     {
-        $this->finishSubmit();
     }
 
     /**
@@ -317,142 +213,4 @@ abstract class Api implements Params
         return $this->options[$key];
     }
 
-    /**
-     * @desc   __get 获取值
-     * @author chenmingming
-     *
-     * @param $key
-     *
-     * @return mixed|null
-     */
-    public function __get($key)
-    {
-        $apiParam = $this->get($key);
-        if (is_null($apiParam)) {
-            return null;
-        }
-
-        return $apiParam->getValue();
-    }
-
-    /**
-     * @desc   setDenyResubmitKey 设置防止重复提交的唯一key
-     * @author chenmingming
-     *
-     * @param array  $params 参与的key
-     * @param string $suffix 前缀
-     */
-    protected function setDenyResubmitKey(array $params = [], $suffix = '')
-    {
-        $this->initResubmit();
-        $this->options[self::OPT_DENY_RESUBMIT]['key_params'] = $params;
-        $this->options[self::OPT_DENY_RESUBMIT]['key_suffix'] = $suffix;
-    }
-
-    /**
-     * @desc   getDenyResubmitKey 获取key
-     * @author chenmingming
-     * @return string
-     */
-    protected function getDenyResubmitKey()
-    {
-        if ($this->options[self::OPT_DENY_RESUBMIT]) {
-            if ($this->options[self::OPT_DENY_RESUBMIT]['key'] === null) {
-                $keyArray = [];
-                if ($this->options[self::OPT_DENY_RESUBMIT]['key_params']) {
-                    foreach ($this->options[self::OPT_DENY_RESUBMIT]['key_params'] as $param) {
-                        $apiParam = $this->get($param);
-                        if ($apiParam && is_string($apiParam->getValue())) {
-                            $keyArray[] = $apiParam->getValue();
-                        }
-                    }
-                } else {
-                    $keyArray = [
-                        $_SERVER['REQUEST_URI'],
-                        $_SERVER['HTTP_COOKIE'],
-                    ];
-                }
-
-                $keyStr                                        = $this->options[self::OPT_DENY_RESUBMIT]['key_suffix'] . implode('-', $keyArray);
-                $this->options[self::OPT_DENY_RESUBMIT]['key'] =
-                    $this->options[self::OPT_DENY_RESUBMIT]['cache_key_pre']
-                    . md5($keyStr);
-
-                $this->debug('deny_key_str', $keyStr);
-                $this->debug('deny_key', $this->options[self::OPT_DENY_RESUBMIT]['key']);
-            }
-
-            return $this->options[self::OPT_DENY_RESUBMIT]['key'];
-
-        } else {
-            return '';
-        }
-    }
-
-    /**
-     * @desc   finishSubmit 清除重复提交验证
-     * @author chenmingming
-     */
-    protected function finishSubmit()
-    {
-        if ($this->options[self::OPT_DENY_RESUBMIT]) {
-            if ($this->return['code'] != $this->options[self::OPT_DENY_RESUBMIT]['code'])
-                //如果开始了重复提交 则业务正常结束后删除key
-                Cache::rm($this->getDenyResubmitKey());
-        }
-    }
-
-    /**
-     * @desc   checkResubmit 检查是否重复提交
-     * @author chenmingming
-     * @throws ApiException
-     */
-    protected function checkResubmit()
-    {
-        if ($this->options[self::OPT_DENY_RESUBMIT]) {
-            $this->initResubmit();
-            //已经开启防止重复提交
-            $queueNum = Cache::inc($this->getDenyResubmitKey(), 1, $this->options[self::OPT_DENY_RESUBMIT]['expire']);
-            $this->debug('queueNum', $queueNum);
-            if ($queueNum !== 1) {
-                throw new ApiException(
-                    $this->options[self::OPT_DENY_RESUBMIT]['msg'],
-                    $this->options[self::OPT_DENY_RESUBMIT]['code']
-                );
-            }
-        }
-    }
-
-    /**
-     * @desc   initResubmit 初始化重复提交配置
-     * @author chenmingming
-     */
-    private function initResubmit()
-    {
-        if (isset($this->options[self::OPT_DENY_RESUBMIT]['init'])) {
-            return;
-        }
-        if (!is_array($this->options[self::OPT_DENY_RESUBMIT])) {
-            $this->options[self::OPT_DENY_RESUBMIT] = [];
-        }
-        $this->options[self::OPT_DENY_RESUBMIT] = array_merge([
-            'key'           => null,
-            'key_params'    => [],
-            'key_suffix'    => '',
-            'expire'        => 2,
-            'code'          => 'SYSTEM_BUSY',
-            'msg'           => '系统正在处理中...',
-            'cache_key_pre' => 'deny_resubmit_',
-            'init'          => true,
-        ], $this->options[self::OPT_DENY_RESUBMIT]);
-    }
-
-    /**
-     * @desc   denyResubmit
-     * @author chenmingming
-     */
-    protected function denyResubmit()
-    {
-        $this->initResubmit();
-    }
 }

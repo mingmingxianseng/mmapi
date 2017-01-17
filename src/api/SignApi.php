@@ -11,7 +11,7 @@ namespace mmapi\api;
 use mmapi\core\Api;
 use mmapi\core\ApiParams;
 
-abstract class SignApi extends Api
+abstract class SignApi extends DenyResubmitApi
 {
     const OPT_SECRET = 'secret';
     const OPT_WITHOUT_CHECK_SIGN = 'without_check_sign';
@@ -29,7 +29,7 @@ abstract class SignApi extends Api
         parent::__construct();
         if (!$this->options[self::OPT_WITHOUT_CHECK_SIGN] && $this->makeSign() != $this->get('sign')->getValue()) {
             $this->error('签名错误', 'SIGNATURE_ERROR');
-        } 
+        }
     }
 
     /**

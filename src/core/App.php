@@ -91,7 +91,7 @@ class  App
             Log::error("trace:\r\n" . var_export(explode("\n", $e->getTraceAsString()), true));
         }
         if (!headers_sent() && DEBUG) {
-            Response::create()->error($errno, $e->getMessage(), explode("\n", $e->getTraceAsString()));
+            Response::create()->exception($e);
         }
 
         self::lastLog();
@@ -101,7 +101,7 @@ class  App
     static public function fatalError()
     {
         if (($e = error_get_last()) && DEBUG) {
-            Response::create()->error('fatal_error', $e['message'], $e);
+            Response::create()->error($e['message'], 'fatal_error', $e);
         }
         $e && Log::error($e);
 
