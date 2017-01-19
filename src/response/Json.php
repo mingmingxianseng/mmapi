@@ -52,9 +52,9 @@ class Json extends Response
      * @desc   exception 异常截获
      * @author chenmingming
      *
-     * @param \Exception $e 异常对象
+     * @param \Throwable $e 异常对象
      */
-    public function exception(\Exception $e)
+    public function exception(\Throwable $e)
     {
         if ($e instanceof AppException) {
             $this->set('code', $e->getErrno());

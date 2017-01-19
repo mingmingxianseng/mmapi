@@ -67,7 +67,6 @@ abstract class Controller extends ParseParams
      */
     public function __construct()
     {
-        set_exception_handler([$this, 'exceptionHandler']);
         $this->_start_time = microtime(true);
         $this->options     = array_merge($this->options, Config::get('controller', []));
     }

@@ -8,13 +8,8 @@
 
 namespace mmapi\core;
 
-use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\IBMDB2\DB2Exception;
 use Doctrine\DBAL\Exception\DriverException;
-use Doctrine\ORM\Mapping\AnsiQuoteStrategy;
-use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
-use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
@@ -42,13 +37,13 @@ class Db
     {
         $this->options = $options;
         $this->db_name = isset($options['name']) ? $options['name'] : md5(serialize($options));
-        $cache         = Cache::store();
-        $memcache      = null;
-        if ($cache) {
-            /** @var \Memcached $handler */
-            $handler = $cache->handler();
-            ($handler instanceof \Memcached) && $memcache = new DbCache($handler);
+
+        $memcache = null;
+        if (isset($this->options['no_cache'])) {
+            $cache = Cache::store();
+            $cache && $memcache = new DbCache($cache->handler());
         }
+
         $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $memcache);
         $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));
         $config->setSQLLogger(new SqlLog());

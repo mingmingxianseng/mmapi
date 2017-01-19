@@ -61,7 +61,6 @@ class  App
         //加载配置文件
         $conf_path = Config::get('conf_path', VPATH . '/conf');
         define('CONF_PATH', $conf_path);
-
         $conf_file_array = Config::get('conf_file', ['conf.php']);
         if (is_string($conf_file_array)) {
             $conf_file_array = [$conf_file_array];
@@ -77,7 +76,7 @@ class  App
      *
      * @access public
      *
-     * @param \Exception $e 异常对象
+     * @param \Throwable $e 异常对象
      */
     static public function handleException($e)
     {
@@ -139,9 +138,7 @@ class  App
      */
     static public function appError($errno, $errstr, $errfile, $errline)
     {
-        $errno & Config::get('error_reporting') === $errno
-        &&
-        Log::error("[{$errno}] $errstr \r\n #{$errfile} +{$errline}");
+        Log::error("appError [{$errno}] $errstr  @{$errfile} +{$errline}");
     }
 
 }

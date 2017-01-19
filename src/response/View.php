@@ -58,7 +58,7 @@ class View extends Response
      *
      * @param \Exception $e
      */
-    public function exception(\Exception $e)
+    public function exception(\Throwable $e)
     {
         $loader = new \Twig_Loader_Filesystem(__DIR__ . '/view');
         $twig   = new \Twig_Environment($loader, $this->options['twig']);

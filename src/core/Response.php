@@ -83,9 +83,9 @@ abstract class Response
      * @desc   exception
      * @author chenmingming
      *
-     * @param \Exception $e 异常
+     * @param \Throwable $e 异常
      */
-    abstract public function exception(\Exception $e);
+    abstract public function exception(\Throwable $e);
 
     /**
      * 发送数据到客户端

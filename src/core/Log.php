@@ -57,7 +57,6 @@ class Log
     public static function init($config = [])
     {
         self::$config = $config;
-
         self::$driver = new File($config);
     }
 
@@ -83,6 +82,9 @@ class Log
      */
     public static function record($msg, $type = 'log')
     {
+        if (is_null(self::$driver)) {
+            self::init(Config::get('log'));
+        }
         if (self::$config['status'] === false) {
             return;
         }
