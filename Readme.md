@@ -35,5 +35,9 @@
         $this->addParam('name');
         $this->denyResubmit();
     }
+##2017-01-20
+php版本升级到7.1
+\Exception 变更为 \Throwable
+
 
 

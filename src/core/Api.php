@@ -87,9 +87,9 @@ abstract class Api extends ParseParams
      * @desc   exceptionHandler 异常拦截
      * @author chenmingming
      *
-     * @param \Exception $e
+     * @param \Throwable $e
      */
-    public function exceptionHandler(\Exception $e)
+    public function exceptionHandler(\Throwable $e)
     {
         if ($this->getOption(self::OPT_DEBUG)) {
             $this
