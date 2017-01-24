@@ -138,6 +138,7 @@ class  App
      */
     static public function appError($errno, $errstr, $errfile, $errline)
     {
+        (Config::get('error_reportiong') & $errno) === $errno &&
         Log::error("appError [{$errno}] $errstr  @{$errfile} +{$errline}");
     }
 

@@ -36,11 +36,12 @@ class SqlLog implements SQLLogger
     {
         self::$num++;
         $this->start_time = microtime(true);
-
-        $sql = "[" . self::$num . "] " . $sql;
+        $sql              = "[" . self::$num . "] " . $sql;
         if (null !== $params) {
-            $sql = str_replace(['?'], '"%s"', $sql);
-            $sql = vsprintf($sql, $this->normalizeParams($params));
+            $i   = 0;
+            $sql = preg_replace_callback('/\?/', function () use ($params, &$i) {
+                return $params[$i++];
+            }, $sql);
         }
         $this->sql = $sql;
     }
