@@ -2,6 +2,7 @@
 model/
 vendor/
 project/
+.gitignore
 cli-config.php
 bootstrap.php
 *.php~
