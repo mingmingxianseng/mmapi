@@ -16,13 +16,13 @@ namespace mmapi\log;
  */
 class File
 {
-    const COLOR_RIGHT = "\033[1;40;35m";
-    const COLOR_RED = "\033[1;40;31m";
-    const COLOR_COMMON = "\033[1;40;33m";
-    const COLOR_GREEN = "\033[40;32m";
-    const COLOR_BLUE = "\033[1;40;36m";
-    const COLOR_GREY = "\033[1;40;30m";
-    const COLOR_END = "\033[0m";
+    const COLOR_RIGHT = Color::PINK;
+    const COLOR_RED = Color::RED;
+    const COLOR_COMMON = Color::BLUE;
+    const COLOR_GREEN = Color::GREEN;
+    const COLOR_BLUE = Color::BLUE;
+    const COLOR_GREY = Color::GREY;
+    const COLOR_END = Color::END;
 
     protected $config = [
         //开关
