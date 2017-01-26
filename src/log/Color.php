@@ -8,7 +8,7 @@
 
 namespace mmapi\log;
 
-class Color
+interface Color
 {
     const PINK = "\033[1;40;35m";
     const RED = "\033[1;40;31m";
