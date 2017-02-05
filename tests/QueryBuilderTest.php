@@ -275,4 +275,17 @@ class QueryBuilderTest extends TestCase
 
         echo $this->formatStr($actual);
     }
+
+    public function testLike()
+    {
+        $query = Db::create()->sqlBuilder()
+            ->select()
+            ->from('master')
+            ->where('id')->eq('1')
+            ->where('name')->like('123')
+            ->where('id2')->match('344_%');
+
+        $this->assertEquals($query->getSql(), 'SELECT * FROM `master`  WHERE  id = ?  AND  name like ?  AND  id2 like ? ');
+
+    }
 }

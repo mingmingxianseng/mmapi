@@ -376,6 +376,40 @@ class QueryBuilder
         return $this->exp($array, 'IN');
     }
 
+    public function notin(array $array)
+    {
+        return $this->exp($array, 'NOT IN');
+    }
+
+    /**
+     * @desc   match 模糊匹配关键字
+     * @author chenmingming
+     *
+     * @param string $keywords 关键字
+     *
+     * @return QueryBuilder
+     */
+    public function match($keywords)
+    {
+        $kw = str_replace("_", "\_", trim($keywords));
+        $kw = str_replace("%", "\%", $kw);
+
+        return $this->like("%{$kw}%");
+    }
+
+    /**
+     * @desc   like
+     * @author chenmingming
+     *
+     * @param string $keywords 关键字
+     *
+     * @return QueryBuilder
+     */
+    public function like($keywords)
+    {
+        return $this->exp($keywords, 'like');
+    }
+
     /**
      * @desc   isNull
      * @author chenmingming
@@ -707,10 +741,10 @@ class QueryBuilder
                 }
 
                 if ($exp) {
-                    if ($exp == 'IN') {
+                    if ($exp == 'IN' || $exp == "NOT IN") {
                         if (is_array($value)) {
                             $this->params = array_merge($this->params, $value);
-                            $str .= " {$field} IN (" . implode(',', array_fill(0, count($value), '?')) . ") ";
+                            $str .= " {$field} {$exp} (" . implode(',', array_fill(0, count($value), '?')) . ") ";
                         }
                         //非数组直接跳过
                     } else {
@@ -757,6 +791,8 @@ class QueryBuilder
      */
     public function fetch()
     {
+        $this->limit(0, 1);
+
         return $this->db->query($this->getSql(), $this->params)->fetch();
     }
 

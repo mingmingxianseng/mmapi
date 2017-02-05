@@ -39,5 +39,9 @@
 php版本升级到7.1
 \Exception 变更为 \Throwable
 
+##2017-02-06
+sqlBuilder 新增 like 支持
+ 并支持 match 模糊匹配 自动过滤 % 和 _
+
 
 
