@@ -44,8 +44,8 @@ class  App
 
         self::loadConf();
         defined('DEBUG') || define('DEBUG', Config::get('debug') == true);
-
-        Dispatcher::dispatch();
+        if (Config::get('dispatch', true))
+            Dispatcher::dispatch();
     }
 
     /**
