@@ -407,7 +407,7 @@ class ApiParams implements Params
      * @desc   setRequireException
      * @author chenmingming
      *
-     * @param array|\Exception $exception 异常
+     * @param array|\Exception|string $exception 异常
      *
      * @return $this
      */
@@ -437,7 +437,7 @@ class ApiParams implements Params
      * @desc   setException 设置异常
      * @author chenmingming
      *
-     * @param array|\Exception $exception 异常
+     * @param array|\Exception|string $exception 异常
      * @param string           $type      异常类型
      */
     protected function setException($exception, $type)

@@ -57,6 +57,12 @@ class QueryBuilder
     /** @var  Db */
     private $db;
 
+    /**
+     * QueryBuilder constructor.
+     *
+     * @param Db $db
+     * @param    $options
+     */
     public function __construct(Db $db, $options)
     {
         $this->db      = $db;
@@ -70,9 +76,9 @@ class QueryBuilder
      * @param string $option 配置项
      * @param mixed  $value  配置值
      *
-     * @return $this
+     * @return QueryBuilder
      */
-    public function setOptions($option, $value)
+    public function setOptions($option, $value): QueryBuilder
     {
         $this->options[$option] = $value;
 
@@ -87,7 +93,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function select($field = '*')
+    public function select($field = '*'): QueryBuilder
     {
         $this->query_type = self::TYPE_SELECT;
         $this->field      = $field;
@@ -104,14 +110,14 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function from($tableName, $alias = '')
+    public function from($tableName, $alias = ''): QueryBuilder
     {
         $this->setTableName($tableName, $alias);
 
         return $this;
     }
 
-    public function join($tableName, $alias = '', $type = 'INNER')
+    public function join($tableName, $alias = '', $type = 'INNER'): QueryBuilder
     {
         $this->parseJoin();
         $this->joinType  = $type;
@@ -120,12 +126,12 @@ class QueryBuilder
         return $this;
     }
 
-    public function leftJoin($tableName, $alias = '')
+    public function leftJoin($tableName, $alias = ''): QueryBuilder
     {
         return $this->join($tableName, $alias, 'LEFT');
     }
 
-    public function rightJoin($tableName, $alias = '')
+    public function rightJoin($tableName, $alias = ''): QueryBuilder
     {
         return $this->join($tableName, $alias, 'RIGHT');
     }
@@ -141,7 +147,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function on($fieldA, $fieldB, $exp = '=', $logic = 'and')
+    public function on($fieldA, $fieldB, $exp = '=', $logic = 'and'): QueryBuilder
     {
         $this->joinCondition[] = [$fieldA, $fieldB, $exp, $logic];
 
@@ -180,7 +186,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function update($tableName)
+    public function update($tableName): QueryBuilder
     {
         $this->query_type = self::TYPE_UPDATE;
         $this->setTableName($tableName);
@@ -196,7 +202,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function insert($tableName)
+    public function insert($tableName): QueryBuilder
     {
         $this->query_type = self::TYPE_INSERT;
         $this->setTableName($tableName);
@@ -212,7 +218,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function replace($tableName)
+    public function replace($tableName): QueryBuilder
     {
         $this->query_type = self::TYPE_REPLACE;
         $this->setTableName($tableName);
@@ -228,7 +234,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function delete($tableName)
+    public function delete($tableName): QueryBuilder
     {
         $this->query_type = self::TYPE_DELETE;
         $this->setTableName($tableName);
@@ -244,7 +250,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function where($field)
+    public function where($field): QueryBuilder
     {
         return $this->andWhere($field);
     }
@@ -257,7 +263,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function andWhere($field)
+    public function andWhere($field): QueryBuilder
     {
         $this->parseCurrentField();
         $this->current_type  = self::QUERY_WHERE;
@@ -275,7 +281,7 @@ class QueryBuilder
      *
      * @return $this
      */
-    public function orWhere($field)
+    public function orWhere($field): QueryBuilder
     {
         $this->parseCurrentField();
         $this->current_type  = self::QUERY_WHERE;
@@ -293,7 +299,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function eq($value)
+    public function eq($value): QueryBuilder
     {
         return $this->exp($value, '=');
     }
@@ -306,7 +312,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function gt($value)
+    public function gt($value): QueryBuilder
     {
         return $this->exp($value, '>');
     }
@@ -319,7 +325,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function lt($value)
+    public function lt($value): QueryBuilder
     {
         return $this->exp($value, '<');
     }
@@ -332,7 +338,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function neq($value)
+    public function neq($value): QueryBuilder
     {
         return $this->exp($value, '!=');
     }
@@ -345,7 +351,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function ge($value)
+    public function ge($value): QueryBuilder
     {
         return $this->exp($value, '>=');
     }
@@ -358,7 +364,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function le($value)
+    public function le($value): QueryBuilder
     {
         return $this->exp($value, '<=');
     }
@@ -376,7 +382,15 @@ class QueryBuilder
         return $this->exp($array, 'IN');
     }
 
-    public function notin(array $array)
+    /**
+     * @desc   notin
+     * @author chenmingming
+     *
+     * @param array $array notin的范围
+     *
+     * @return QueryBuilder
+     */
+    public function notin(array $array): QueryBuilder
     {
         return $this->exp($array, 'NOT IN');
     }
@@ -389,7 +403,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function match($keywords)
+    public function match($keywords): QueryBuilder
     {
         $kw = str_replace("_", "\_", trim($keywords));
         $kw = str_replace("%", "\%", $kw);
@@ -405,7 +419,7 @@ class QueryBuilder
      *
      * @return QueryBuilder
      */
-    public function like($keywords)
+    public function like($keywords): QueryBuilder
     {
         return $this->exp($keywords, 'like');
     }
@@ -413,9 +427,9 @@ class QueryBuilder
     /**
      * @desc   isNull
      * @author chenmingming
-     * @return $this
+     * @return QueryBuilder
      */
-    public function isNull()
+    public function isNull(): QueryBuilder
     {
         $this->current_field .= ' IS NULL ';
 
@@ -428,9 +442,9 @@ class QueryBuilder
      *
      * @param string $field 字段名称
      *
-     * @return $this
+     * @return QueryBuilder
      */
-    public function set($field)
+    public function set($field): QueryBuilder
     {
         $this->parseCurrentField();
         $this->current_logic = self::LOGIC_AND;
@@ -446,9 +460,9 @@ class QueryBuilder
      *
      * @param string $value 设置的值
      *
-     * @return $this
+     * @return QueryBuilder
      */
-    public function value($value)
+    public function value($value): QueryBuilder
     {
         $this->exp($value, false);
 
@@ -461,9 +475,9 @@ class QueryBuilder
      *
      * @param string $value 设置的值 表达式值
      *
-     * @return $this
+     * @return QueryBuilder
      */
-    public function expValue($value)
+    public function expValue($value): QueryBuilder
     {
         $this->exp($value, true);
 
@@ -473,9 +487,9 @@ class QueryBuilder
     /**
      * @desc   isNotNull
      * @author chenmingming
-     * @return $this
+     * @return QueryBuilder
      */
-    public function isNotNull()
+    public function isNotNull(): QueryBuilder
     {
         $this->current_field .= ' IS NOT NULL ';
 
@@ -489,9 +503,9 @@ class QueryBuilder
      * @param      $value
      * @param null $exp
      *
-     * @return $this
+     * @return QueryBuilder
      */
-    public function exp($value, $exp = null)
+    public function exp($value, $exp = null): QueryBuilder
     {
         $this->current_exp   = $exp;
         $this->current_value = $value;
@@ -506,9 +520,9 @@ class QueryBuilder
      *
      * @param string $order 排序
      *
-     * @return $this
+     * @return QueryBuilder
      */
-    public function order($order)
+    public function order($order): QueryBuilder
     {
         $this->order = $order;
 
@@ -522,9 +536,9 @@ class QueryBuilder
      * @param int $start 开始
      * @param int $size  数量
      *
-     * @return $this
+     * @return QueryBuilder
      */
-    public function limit($start, $size)
+    public function limit($start, $size): QueryBuilder
     {
         $this->limit = " LIMIT {$start},{$size} ";
 
@@ -561,7 +575,7 @@ class QueryBuilder
      * @author chenmingming
      * @return string
      */
-    public function getSql()
+    public function getSql(): string
     {
         if (is_null($this->sql)) {
             $this->parse();
@@ -573,9 +587,9 @@ class QueryBuilder
     /**
      * @desc   parse 解析sql
      * @author chenmingming
-     * @return $this
+     * @return QueryBuilder
      */
-    public function parse()
+    public function parse(): QueryBuilder
     {
         $this->parseCurrentField();
         $this->sql = '';

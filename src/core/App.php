@@ -19,6 +19,7 @@ class  App
         set_exception_handler('mmapi\core\App::handleException');
         register_shutdown_function('mmapi\core\App::fatalError');
         set_error_handler('mmapi\core\App::appError');
+
         define('REQUEST_ID', uniqid());
         define('START_TIME', microtime(true));
 
@@ -44,6 +45,8 @@ class  App
 
         self::loadConf();
         defined('DEBUG') || define('DEBUG', Config::get('debug') == true);
+        ini_set('date.timezone', Config::get('timezone', 'PRC'));
+
         if (Config::get('dispatch', true))
             Dispatcher::dispatch();
     }
