@@ -51,7 +51,7 @@ class DebugRequest extends Request
      * @descrpition 关注
      *
      *
-     * @return array
+     * @return string
      */
     public function eventSubscribe()
     {
@@ -64,7 +64,7 @@ class DebugRequest extends Request
      * @descrpition 取消关注
      *
      *
-     * @return array
+     * @return string
      */
     public function eventUnsubscribe()
     {
@@ -77,7 +77,7 @@ class DebugRequest extends Request
      * @descrpition 扫描二维码关注（未关注时）
      *
      *
-     * @return array
+     * @return string
      */
     public function eventQrsceneSubscribe()
     {
@@ -90,7 +90,7 @@ class DebugRequest extends Request
      * @descrpition 扫描二维码（已关注时）
      *
      *
-     * @return array
+     * @return string
      */
     public function eventScan()
     {
@@ -103,7 +103,7 @@ class DebugRequest extends Request
      * @descrpition 上报地理位置
      *
      *
-     * @return array
+     * @return string
      */
     public function eventLocation()
     {
@@ -116,7 +116,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 点击菜单拉取消息时的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventClick()
     {
@@ -131,7 +131,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 点击菜单跳转链接时的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventView()
     {
@@ -146,7 +146,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 扫码推事件的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventScancodePush()
     {
@@ -164,7 +164,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 扫码推事件且弹出“消息接收中”提示框的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventScancodeWaitMsg()
     {
@@ -182,7 +182,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 弹出系统拍照发图的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventPicSysPhoto()
     {
@@ -201,7 +201,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 弹出拍照或者相册发图的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventPicPhotoOrAlbum()
     {
@@ -220,7 +220,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 弹出微信相册发图器的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventPicWeixin()
     {
@@ -239,7 +239,7 @@ class DebugRequest extends Request
      * @descrpition 自定义菜单 - 弹出地理位置选择器的事件推送
      *
      *
-     * @return array
+     * @return string
      */
     public function eventLocationSelect()
     {

@@ -43,5 +43,78 @@ php版本升级到7.1
 sqlBuilder 新增 like 支持
  并支持 match 模糊匹配 自动过滤 % 和 _
 
+##2017-02-08
+支持微信支付
+###初始化
+    Config::batchSet(['wxpay' => [
+        'app_id'      => 'wx******',
+        'mch_id'      => 127********,
+        'app_key'     => '******',//api key
+        'cert_path'   => __DIR__ . '/cert/apiclient_cert.pem',
+        'key_path'    => __DIR__ . '/cert/apiclient_key.pem',
+        'rootca_path' => __DIR__ . '/cert/rootca.pem',
+    ]]);
+    $this->pay        = new Pay(Config::get('wxpay'));
+    $this->outTradeNo = '201702081642188710';
+###创建订单   
+    $request = $this->pay->create();
+    $request
+        ->setBody('test')
+        ->setOutTradeNo($this->outTradeNo)
+        ->setTotalFee(1)
+        ->setNotifyUrl('')
+        ->setTradeType(CreateOrderRequest::TRADE_TYPE_APP)
+        ->setSpbillCreateIp('192.168.1.1')
+        ->send();    
+    if ($response->isSuccessful()) {
+        //退款成功
+    } else {
+        echo $response->getError();
+    }
+###查询订单
+
+    $request = $this->pay->query();
+    $request->setOutTradeNo($this->outTradeNo)->send();
+    if ($response->isSuccessful()) {
+        $payData = $response->getData();
+    } else {
+        echo $response->getError();
+    }
+
+###关闭订单
+     $response = $this->pay->close($this->outTradeNo);
+     if ($response->isSuccessful()) {
+         //关闭成功
+     } else {
+        //关闭失败 获取失败原因
+         echo $response->getError();
+     }
+     
+### 申请退款
+    $request = $this->pay->refund();
+    
+    $response = $request
+        ->setOutTradeNo($this->outTradeNo)
+        ->setOutRefundNo(date('YmdHis') . mt_rand(10, 99))
+        ->setTotalFee(1000)
+        ->setRefundFee(1000)
+        ->send();
+
+    if ($response->isSuccessful()) {
+        //退款成功
+    } else {
+         //失败 获取失败原因
+        echo $response->getError();
+    }
+### 查询退款窗台
+    $request = $this->pay->queryRefund();
+    $response = $request->setOutTradeNo('201701191906141174')
+        ->send();
+    if ($response->isSuccessful()) {
+        //退款成功
+    } else {
+        echo $response->getError();
+    }
+
 
 
