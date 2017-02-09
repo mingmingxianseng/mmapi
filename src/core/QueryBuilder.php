@@ -91,7 +91,7 @@ class QueryBuilder
      *
      * @param string $field 要查询的表达式
      *
-     * @return $this
+     * @return QueryBuilder
      */
     public function select($field = '*'): QueryBuilder
     {
@@ -108,7 +108,7 @@ class QueryBuilder
      * @param string $tableName 表名称
      * @param string $alias     别名
      *
-     * @return $this
+     * @return QueryBuilder
      */
     public function from($tableName, $alias = ''): QueryBuilder
     {
@@ -117,20 +117,51 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * @desc   join
+     * @author chenmingming
+     *
+     * @param        $tableName
+     * @param string $alias
+     * @param string $type
+     *
+     * @return QueryBuilder
+     */
     public function join($tableName, $alias = '', $type = 'INNER'): QueryBuilder
     {
         $this->parseJoin();
         $this->joinType  = $type;
-        $this->joinTable = $tableName . ' ' . $alias;
+        $this->joinTable = "`$tableName`";
+        if ($alias) {
+            $this->joinTable .= " " . trim($alias);
+        }
 
         return $this;
     }
 
+    /**
+     * @desc   leftJoin
+     * @author chenmingming
+     *
+     * @param        $tableName
+     * @param string $alias
+     *
+     * @return QueryBuilder
+     */
     public function leftJoin($tableName, $alias = ''): QueryBuilder
     {
         return $this->join($tableName, $alias, 'LEFT');
     }
 
+    /**
+     * @desc   rightJoin
+     * @author chenmingming
+     *
+     * @param        $tableName
+     * @param string $alias
+     *
+     * @return QueryBuilder
+     */
     public function rightJoin($tableName, $alias = ''): QueryBuilder
     {
         return $this->join($tableName, $alias, 'RIGHT');
@@ -145,7 +176,7 @@ class QueryBuilder
      * @param string $exp
      * @param string $logic
      *
-     * @return $this
+     * @return QueryBuilder
      */
     public function on($fieldA, $fieldB, $exp = '=', $logic = 'and'): QueryBuilder
     {
@@ -160,22 +191,24 @@ class QueryBuilder
      */
     protected function parseJoin()
     {
-        $sql = '';
         if ($this->joinTable && $this->joinType && $this->joinCondition) {
             $sql   = "$this->joinType JOIN {$this->joinTable}";
-            $first = true;
+            $index = 0;
             foreach ($this->joinCondition as $condition) {
                 list($filedA, $filedB, $exp, $logic) = $condition;
-                if ($first) {
+                if ($index++ === 0) {
                     $sql .= " ON {$filedA} {$exp} {$filedB}";
-                    $first = false;
                 } else {
                     $sql .= " {$logic} {$filedA} {$exp} {$filedB}";
                 }
             }
             $this->joinTable = $this->joinType = $this->joinCondition = null;
+
+            if ($this->join) {
+                $this->join .= ' ';
+            }
+            $this->join .= $sql;
         }
-        $this->join .= $sql;
     }
 
     /**

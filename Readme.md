@@ -118,3 +118,7 @@ sqlBuilder 新增 like 支持
 
 
 
+##2017-02-09
+
+修复sqlBuilder join 3张表的bug 
+

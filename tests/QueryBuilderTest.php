@@ -288,4 +288,16 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals($query->getSql(), 'SELECT * FROM `master`  WHERE  id = ?  AND  name like ?  AND  id2 like ? ');
 
     }
+
+    public function testThreeJoin()
+    {
+        $query = Db::create()->sqlBuilder()
+            ->select()
+            ->from('a')
+            ->leftJoin('b')->on('a.id', 'b.id')
+            ->leftJoin('c')->on('a.id', 'c.id')->on('a.bid','c.bid','!=','or');
+
+        echo $query->getSql();
+
+    }
 }
