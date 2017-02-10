@@ -81,7 +81,7 @@ class Pay
      *
      * @return CloseOrderResponse
      */
-    public function close(string $outTradeNo): CloseOrderResponse
+    public function close($outTradeNo)
     {
         $request = new CloseOrderRequest($this->client);
 

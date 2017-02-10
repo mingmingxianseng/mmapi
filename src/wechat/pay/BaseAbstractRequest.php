@@ -47,7 +47,7 @@ abstract class BaseAbstractRequest
      *
      * @return BaseAbstractRequest
      */
-    public function setAppId($app_id): BaseAbstractRequest
+    public function setAppId($app_id)
     {
         $this->parameters->set('app_id', $app_id);
 
@@ -67,7 +67,7 @@ abstract class BaseAbstractRequest
      *
      * @return BaseAbstractRequest
      */
-    public function setApiKey($api_key): BaseAbstractRequest
+    public function setApiKey($api_key)
     {
         $this->parameters->set('api_key', $api_key);
 
@@ -87,7 +87,7 @@ abstract class BaseAbstractRequest
      *
      * @return BaseAbstractRequest
      */
-    public function setMchId($mch_id): BaseAbstractRequest
+    public function setMchId($mch_id)
     {
         $this->parameters->set('mch_id', $mch_id);
 

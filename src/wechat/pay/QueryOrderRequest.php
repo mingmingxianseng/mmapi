@@ -26,7 +26,7 @@ class QueryOrderRequest extends BaseAbstractRequest
      * @return array
      * @throws WechatException
      */
-    public function getData(): array
+    public function getData()
     {
         $this->validate('app_id', 'mch_id');
 

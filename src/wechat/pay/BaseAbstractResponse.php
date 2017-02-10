@@ -25,7 +25,7 @@ abstract class BaseAbstractResponse
     /**
      * @return BaseAbstractRequest
      */
-    public function getRequest(): BaseAbstractRequest
+    public function getRequest()
     {
         return $this->request;
     }
