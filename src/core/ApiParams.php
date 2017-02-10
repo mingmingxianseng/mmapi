@@ -233,9 +233,6 @@ class ApiParams implements Params
         $this->validate_value = $validate_value;
         switch ($validate_type) {
             case self::VALIDATE_TYPE_COMMON:
-                if (!is_callable($validate_value)) {
-                    throw new AppException("参数验证回调非法", 'PARAM_CALLBACK_INVALID');
-                }
                 break;
             case self::VALIDATE_TYPE_IN:
                 if (!is_array($validate_value)) {
@@ -422,7 +419,7 @@ class ApiParams implements Params
      * @desc   setValidateException
      * @author chenmingming
      *
-     * @param array|\Exception $exception 异常
+     * @param array|\Exception $exception|string 异常
      *
      * @return $this
      */
