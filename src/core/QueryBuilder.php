@@ -26,7 +26,7 @@ class QueryBuilder
         'tablePrefix' => '',//表名前缀
     ];
 
-    private $query_type;//sql类型
+    private $query_type = self::TYPE_SELECT;//sql类型
     private $current_field;//当前字段
     private $current_logic;//and or
     private $current_type;//where 还是 data
@@ -36,7 +36,7 @@ class QueryBuilder
 
     private $table_name;//表名
     private $data;
-    private $field;
+    private $field = '*';
 
     private $joinTable;//关联表
     private $joinCondition;//关联条件
@@ -908,5 +908,16 @@ class QueryBuilder
     public function getLastInsertId()
     {
         return $this->db->getLastInsertId();
+    }
+
+    /**
+     * clone
+     *
+     * @author chenmingming
+     * @return QueryBuilder
+     */
+    public function clone(): QueryBuilder
+    {
+        return clone $this;
     }
 }
