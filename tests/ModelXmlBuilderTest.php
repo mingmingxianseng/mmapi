@@ -49,14 +49,14 @@ class ModelXmlBuilderTest extends TestCase
     {
         $obj = new ModelXmlBuilder();
         $obj->setDb(Db::create())
-            ->setNamespace('model\entity')
-            ->setTableName('mall_goods');
-        foreach (Db::create()->query('show tables')->fetchAll() as $v) {
+            ->setNamespace('model\entity');
+        foreach (Db::create()->query('show tables like "admin%"')->fetchAll() as $v) {
             $table = current($v);
             try {
                 $obj
                     ->setTableName($table)
-                    ->builder(dirname(__DIR__) . '/model/football/');
+                    ->setEntity(strtr($table, ['admin_' => '']))
+                    ->builder(dirname(__DIR__) . '/model/xml/');
             } catch (AppException $e) {
                 echo ($e->getMessage()) . PHP_EOL;
             }

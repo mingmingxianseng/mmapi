@@ -101,7 +101,7 @@ class ModelXmlBuilder
      */
     public function setEntity($entity)
     {
-        $this->entity = $entity;
+        $this->entity = $this->namespace . '\\' . ucfirst($this->underline2Camel($entity));
 
         return $this;
     }

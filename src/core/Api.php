@@ -8,7 +8,6 @@
 
 namespace mmapi\core;
 
-
 abstract class Api extends ParseParams
 {
     //是否开始调试
@@ -19,7 +18,6 @@ abstract class Api extends ParseParams
     const OPT_DEFAULT_CODE = 'default_code';
     //接口默认返回提交消息
     const OPT_DEFAULT_MSG = 'default_msg';
-
 
     //接口请求开始时间
     protected $_start_time;
@@ -100,22 +98,9 @@ abstract class Api extends ParseParams
             $this->set('detail', $e->getDetail());
         }
         $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
-        $this->error($e->getMessage(), $errno);
-        App::handleException($e);
-    }
 
-    /**
-     * @desc   error 错误输出
-     * @author chenmingming
-     *
-     * @param string $msg  错误字符串
-     * @param string $code 错误码
-     */
-    protected function error($msg, $code)
-    {
-        $this->set('code', $code)
-            ->set('msg', $msg)
-            ->send();
+        $this->set('code', $e->getMessage())->set('msg', $errno)->send();
+        App::handleException($e);
     }
 
     /**
