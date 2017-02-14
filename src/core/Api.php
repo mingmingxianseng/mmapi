@@ -99,7 +99,7 @@ abstract class Api extends ParseParams
         }
         $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
 
-        $this->set('code', $e->getMessage())->set('msg', $errno)->send();
+        $this->set('msg', $e->getMessage())->set('code', $errno)->send();
         App::handleException($e);
     }
 
