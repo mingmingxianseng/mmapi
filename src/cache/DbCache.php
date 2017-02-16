@@ -15,14 +15,6 @@ use mmapi\core\Cache;
 
 class DbCache extends CacheProvider
 {
-    /** @var  Memcached */
-    protected $memcached;
-
-    public function __construct(Memcached $memcached)
-    {
-        $this->memcached = $memcached;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -102,17 +94,6 @@ class DbCache extends CacheProvider
      */
     protected function doGetStats()
     {
-        $stats   = $this->memcached->getStats();
-        $servers = $this->memcached->getServerList();
-        $key     = $servers[0]['host'] . ':' . $servers[0]['port'];
-        $stats   = $stats[$key];
-
-        return [
-            \Doctrine\Common\Cache\Cache::STATS_HITS             => $stats['get_hits'],
-            \Doctrine\Common\Cache\Cache::STATS_MISSES           => $stats['get_misses'],
-            \Doctrine\Common\Cache\Cache::STATS_UPTIME           => $stats['uptime'],
-            \Doctrine\Common\Cache\Cache::STATS_MEMORY_USAGE     => $stats['bytes'],
-            \Doctrine\Common\Cache\Cache::STATS_MEMORY_AVAILABLE => $stats['limit_maxbytes'],
-        ];
+        return [];
     }
 }

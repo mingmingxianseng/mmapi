@@ -38,13 +38,13 @@ class Db
         $this->options = $options;
         $this->db_name = isset($options['name']) ? $options['name'] : md5(serialize($options));
 
-        $memcache = null;
-        if (isset($this->options['no_cache'])) {
+        $dbCache = null;
+        if (!isset($this->options['no_cache'])) {
             $cache = Cache::store();
-            $cache && $memcache = new DbCache($cache->handler());
+            $cache && $dbCache = new DbCache($cache->handler());
         }
 
-        $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $memcache);
+        $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $dbCache);
         $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));
         $config->setSQLLogger(new SqlLog());
         try {
