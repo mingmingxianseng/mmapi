@@ -19,7 +19,7 @@ namespace mmapi\wechat\pay;
  * @method CreateOrderRequest setNotifyUrl($val) 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
  * @method CreateOrderRequest setTradeType($val) 取值如下：JSAPI，NATIVE，APP
  * @method CreateOrderRequest setProductId($val) trade_type = NATIVE时（即扫码支付），此参数必传。此参数为二维码中包含的商品ID，商户自行定义
- * @method CreateOrderRequest setOpenid($val) trade_type = JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
+ * @method CreateOrderRequest setOpenId($val) trade_type = JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
  *
  * @method string getDeviceInfo() 设备号
  * @method string getNonceStr() 随机字符串
@@ -36,7 +36,7 @@ namespace mmapi\wechat\pay;
  * @method string getNotifyUrl() 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
  * @method string getTradeType() 取值如下：JSAPI，NATIVE，APP
  * @method string getProductId() trade_type = NATIVE时（即扫码支付），此参数必传。此参数为二维码中包含的商品ID，商户自行定义
- * @method string getOpenid() trade_type = JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
+ * @method string getOpenId() trade_type = JSAPI时（即公众号支付），此参数必传，此参数为微信用户在商户对应appid下的唯一标识
  * @method string getLimitPay() 上传此参数no_credit--可限制用户不能使用信用卡支付
  *
  * @method CreateOrderResponse send()
@@ -72,9 +72,7 @@ class CreateOrderRequest extends BaseAbstractRequest
 
         $tradeType = strtoupper($this->getTradeType());
 
-        if ($tradeType == 'JSAPI') {
-            $this->validate('open_id');
-        }
+        $tradeType == self::TRADE_TYPE_JSAPI && $this->validate('open_id');
 
         $data = [
             'appid'            => $this->getAppId(),//*
