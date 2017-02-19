@@ -122,3 +122,6 @@ sqlBuilder 新增 like 支持
 
 修复sqlBuilder join 3张表的bug 
 
+##2017-02-19
+
+增加根据不同域名加载不同配置的功能

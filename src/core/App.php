@@ -58,20 +58,20 @@ class  App
     static private function loadConf()
     {
         //加载默认配置文件
-        $default_conf_path = dirname(__DIR__) . '/convention.php';
-
-        is_file($default_conf_path) && Config::batchSet(include $default_conf_path);
+        Config::loadFileConf(dirname(__DIR__) . '/convention.php');
         //加载配置文件
-        $conf_path = Config::get('conf_path', VPATH . '/conf');
-        define('CONF_PATH', $conf_path);
-        $conf_file_array = Config::get('conf_file', ['conf.php']);
-        if (is_string($conf_file_array)) {
-            $conf_file_array = [$conf_file_array];
+        $confPath       = Config::get('conf_path', VPATH . '/conf');
+        $confFilesArray = Config::get('conf_file', ['conf.php']);
+        if (is_string($confFilesArray)) {
+            $confFilesArray = [$confFilesArray];
         }
-        foreach ($conf_file_array as $file) {
-            $file = CONF_PATH . '/' . $file;
-            is_file($file) and Config::batchSet(include $file);
-        }
+        foreach ($confFilesArray as $file)
+            Config::loadFileConf($confPath . DIRECTORY_SEPARATOR . $file);
+        //根据域名区分各个环境
+        foreach (Config::get('host_conf', []) as $reg => $file)
+            preg_match($reg, $_SERVER['HTTP_HOST'])
+            AND
+            Config::loadFileConf($confPath . DIRECTORY_SEPARATOR . $file);
     }
 
     /**
@@ -116,7 +116,7 @@ class  App
      */
     static private function lastLog()
     {
-        $file_load  = ' [File loaded：' . count(get_included_files()) . ']';
+        $file_load  = ' [File loaded :' . count(get_included_files()) . ']';
         $server     = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '0.0.0.0';
         $remote     = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
         $method     = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI';
@@ -144,5 +144,4 @@ class  App
         (Config::get('error_reportiong') & $errno) === $errno &&
         Log::error("appError [{$errno}] $errstr  @{$errfile} +{$errline}");
     }
-
 }

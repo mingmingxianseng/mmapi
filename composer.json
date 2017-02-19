@@ -1,7 +1,7 @@
 {
     "name": "mmxs/mmapi",
     "description": "frameworkphp",
-    "version":"3.8.7",
+    "version":"3.8.8",
     "authors": [
         {
             "name": "chenmingming",
@@ -10,7 +10,7 @@
     ],
     "require": {
         "doctrine/orm": "2.5.5",
-        "guzzlehttp/guzzle": "^6.2"
+        "guzzlehttp/guzzle": "6.2"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
