@@ -8,6 +8,9 @@
 
 namespace mmapi\core;
 
+use Doctrine\Common\Cache\MemcacheCache;
+use Doctrine\Common\Cache\MemcachedCache;
+use Doctrine\Common\Cache\RedisCache;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
@@ -40,8 +43,21 @@ class Db
 
         $dbCache = null;
         if (!isset($this->options['no_cache'])) {
-            $cache = Cache::store();
-            $cache && $dbCache = new DbCache($cache->handler());
+            $handle = Cache::store()->handler();
+            switch (get_class($handle)) {
+                case \Redis::class:
+                    $dbCache = new RedisCache();
+                    $dbCache->setRedis($handle);
+                    break;
+                case \Memcache::class:
+                    $dbCache = new MemcacheCache();
+                    $dbCache->setMemcache($handle);
+                    break;
+                case \Memcached::class:
+                    $dbCache = new MemcachedCache();
+                    $dbCache->setMemcached($handle);
+                    break;
+            }
         }
 
         $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $dbCache);
