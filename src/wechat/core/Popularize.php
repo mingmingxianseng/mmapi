@@ -57,7 +57,9 @@ class Popularize extends Base
 
         }
 
-        return $this->wechat->post($queryUrl, $template);
+        return $this->wechat->getHttp()
+            ->setUrl($queryUrl)
+            ->post($template);
     }
 
     /**
@@ -93,7 +95,10 @@ class Popularize extends Base
         $template['long_url'] = $longUrl;
         $template['action']   = 'long2short';
 
-        $rs = $this->wechat->post($queryUrl, $template);
+        $rs = $this->wechat
+            ->getHttp()
+            ->setUrl($queryUrl)
+            ->post($template);
 
         return $rs['short_url'];
     }
