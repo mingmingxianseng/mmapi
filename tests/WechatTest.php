@@ -11,6 +11,7 @@ namespace mmxs\mmapi\tests;
 use mmapi\core\Cache;
 use mmapi\core\Config;
 use mmapi\wechat\cache\CacheProvider;
+use mmapi\wechat\core\TemplateMsg;
 use mmapi\wechat\core\UserManage;
 use mmapi\wechat\log\EchologProvider;
 use mmapi\wechat\Wechat;
@@ -58,5 +59,15 @@ class WechatTest extends TestCase
         print_r($data);
         $user = $userManager->getUser($openid);
         $this->assertEquals($openid, $user->getOpenid());
+    }
+
+    public function testTemplateMsg()
+    {
+        $wechat = new Wechat(Config::get('wechat'), new CacheProvider());
+        $wechat->setLogger(new EchologProvider());
+        $openid = 'o-ZuSwW63xq-iDUQFP6pSLKCW6Xw';
+
+        $tem = new TemplateMsg($wechat);
+        $tem->sendTemplateMessage([], $openid, 1231212, '');
     }
 }
