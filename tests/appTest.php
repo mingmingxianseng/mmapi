@@ -7,25 +7,9 @@
  */
 
 namespace mmxs\mmapi\tests;
-
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\EventManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
-use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Query\Expr;
-use Doctrine\ORM\Query\ResultSetMapping;
-use Doctrine\ORM\Tools\Setup;
-use GuzzleHttp\Psr7\Request;
 use mmapi\core\App;
-use mmapi\core\AppException;
-use mmapi\core\Cache;
 use mmapi\core\Config;
-use mmapi\core\Db;
 use mmapi\core\Log;
-use mmapi\entity\PmsStore;
 
 class appTest extends \PHPUnit_Framework_TestCase
 {
@@ -53,28 +37,10 @@ class appTest extends \PHPUnit_Framework_TestCase
 
     public function test2()
     {
-        Config::batchSet([
-            'cache' => [
-                'type'    => 'complex',
-                'default' => [
-                    'type'          => "file",
-                    'expire'        => 0,
-                    'cache_subdir'  => false,
-                    'prefix'        => '',
-                    'path'          => '',
-                    'data_compress' => false,
-                ],
-
-            ],
-        ]);
-        Cache::set('test', '123456');
-
-        var_dump(Cache::get('test'));
     }
 
     public function testConfig()
     {
-
     }
 
     public function testLog()

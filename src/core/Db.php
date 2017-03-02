@@ -59,7 +59,10 @@ class Db
                     $dbCache = new MemcachedCache();
                     $dbCache->setMemcached($handle);
                     break;
+                default:
+                    throw new AppException("only support memcache|memcached|redis");
             }
+            $dbCache->setNamespace(Cache::store()->getPrefix());
         }
 
         $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $dbCache);
