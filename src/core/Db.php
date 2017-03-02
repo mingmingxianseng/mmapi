@@ -17,6 +17,7 @@ use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use mmapi\cache\DbCache;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Db
 {
@@ -99,6 +100,7 @@ class Db
      * @param object $object 待更新或者插入的对象 entity
      *
      * @throws AppException
+     * @return Db
      */
     public function save($object)
     {
@@ -114,6 +116,7 @@ class Db
      * @param $object
      *
      * @throws AppException
+     * @return Db
      */
     public function remove($object)
     {
@@ -131,13 +134,8 @@ class Db
     {
         try {
             $this->entityManager->flush();
-        } catch (DriverException $e) {
-            $msg = DEBUG ? '删除数据失败' : $e->getMessage();
-            throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
-
-        } catch (DBALException $e) {
-            $msg = DEBUG ? '删除数据失败' : $e->getMessage();
-            throw new AppException($msg, "SQL_ERROR", $e->getTrace());
+        } catch (Exception $e) {
+            throw new AppException($e->getMessage(), $e->getCode(), $e->getTrace());
         }
     }
 
