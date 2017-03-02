@@ -11,9 +11,6 @@ namespace mmapi\core;
 abstract class Model
 {
     const DB_INI = 'default';
-    private $db;
-    private $entityClass;
-
     /**
      * @desc   getInstance 获取一个实例
      * @author chenmingming
@@ -43,45 +40,27 @@ abstract class Model
      */
     public function save()
     {
-        $this->getDb()->save($this);
+        $this->persist()->flush();
+    }
+
+    /**
+     * @desc   persist
+     * @author chenmingming
+     * @return Db
+     */
+    public function persist()
+    {
+        return DB::create(static::DB_INI)->save($this);
     }
 
     /**
      * @desc   remove
      * @author chenmingming
+     * @return Db
      */
     public function remove()
     {
-        $this->getDb()->remove($this);
-    }
-
-    /**
-     * @desc   getDb
-     * @author chenmingming
-     * @return Db
-     */
-    public function getDb()
-    {
-        if (is_null($this->db)) {
-            $class    = $this->getEntityClass();
-            $this->db = Db::create($class::DB_INI);
-        }
-
-        return $this->db;
-    }
-
-    /**
-     * @desc   getEntityClass 获取当前实例的类名称
-     * @author chenmingming
-     * @return string
-     */
-    public function getEntityClass()
-    {
-        if (is_null($this->entityClass)) {
-            $this->entityClass = get_class($this);
-        }
-
-        return $this->entityClass;
+        return DB::create(static::DB_INI)->remove($this);
     }
 
     /**

@@ -20,6 +20,7 @@ use mmapi\cache\DbCache;
 
 class Db
 {
+    /** @var  Db[] $instances */
     static private $instances;
 
     private $options = [];
@@ -102,16 +103,8 @@ class Db
     public function save($object)
     {
         $this->entityManager->persist($object);
-        try {
-            $this->entityManager->flush();
-        } catch (DriverException $e) {
-            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
-            throw new AppException($msg, "SQL_" . $e->getErrorCode(), $e->getTrace());
 
-        } catch (DBALException $e) {
-            $msg = DEBUG ? $e->getMessage() : '更新数据失败';
-            throw new AppException($msg, "SQL_ERROR", $e->getTrace());
-        }
+        return $this;
     }
 
     /**
@@ -125,6 +118,17 @@ class Db
     public function remove($object)
     {
         $this->entityManager->remove($object);
+
+        return $this;
+    }
+
+    /**
+     * @desc   flush
+     * @author chenmingming
+     * @throws AppException
+     */
+    public function flush()
+    {
         try {
             $this->entityManager->flush();
         } catch (DriverException $e) {
@@ -134,6 +138,17 @@ class Db
         } catch (DBALException $e) {
             $msg = DEBUG ? '删除数据失败' : $e->getMessage();
             throw new AppException($msg, "SQL_ERROR", $e->getTrace());
+        }
+    }
+
+    /**
+     * @desc   allFlush 所有db 执行更新操作
+     * @author chenmingming
+     */
+    static public function allFlush()
+    {
+        foreach (self::$instances as $instance) {
+            $instance->flush();
         }
     }
 
