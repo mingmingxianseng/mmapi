@@ -40,7 +40,12 @@ class SqlLog implements SQLLogger
         if (null !== $params) {
             $i   = 0;
             $sql = preg_replace_callback('/\?/', function () use ($params, &$i) {
-                return $params[$i++];
+                if (($val = $params[$i]) instanceof \DateTime) {
+                    return $val->format('Y-m-d H:i:s');
+                }
+                $i++;
+
+                return $val;
             }, $sql);
         }
         $this->sql = $sql;

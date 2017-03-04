@@ -40,6 +40,8 @@ class File
             'sql'   => self::COLOR_GREY,
             'error' => self::COLOR_RED,
         ],
+        //某个类型计入特别的日志文件
+        'apart_level' => [],
     ];
 
     // 实例化并传入参数
@@ -76,13 +78,20 @@ class File
             if (isset($this->config['color'][$type])) {
                 $level = $this->config['color'][$type] . $level . self::COLOR_END;
             }
-            $info .= $level;
+
+            if (isset($this->config['apart_level'][$type])) {
+                error_log("[{$now}] {$this->config['suffix']} \t{$level}", 3, $this->config['apart_level'][$type]);
+            } else {
+                $info .= $level;
+            }
+
         }
-        if ($this->config['togbk']) {
-            $info = iconv('UTF-8', 'GB18030', $info);
+        if ($info) {
+            return error_log("[{$now}] {$this->config['suffix']} \t{$info}", 3, $destination);
         }
 
-        return error_log("[{$now}] {$this->config['suffix']} \t{$info}", 3, $destination);
+        return true;
+
     }
 
 }
