@@ -7,6 +7,7 @@
  */
 
 namespace mmxs\mmapi\tests;
+
 use mmapi\core\App;
 use mmapi\core\Config;
 use mmapi\core\Log;
@@ -32,15 +33,6 @@ class appTest extends \PHPUnit_Framework_TestCase
         Config::set('host_conf', ['/^.+.test.com$/' => 'host.php']);
         App::start();
         $this->assertEquals('12345', Config::get('aaa'));
-
-    }
-
-    public function test2()
-    {
-    }
-
-    public function testConfig()
-    {
     }
 
     public function testLog()
@@ -64,8 +56,20 @@ class appTest extends \PHPUnit_Framework_TestCase
 
     public function testDb()
     {
-
         Config::set('VPATH', dirname(__DIR__));
+        Config::set('dispatch', false);
+        Config::set('db', [
+            'default' => [
+                'is_dev_mode' => true,
+                'conn'        => [
+                    'driver'   => 'pdo_mysql',
+                    'dbname'   => 'zbl',
+                    'host'     => '127.0.0.1',
+                    'user'     => 'root',
+                    'password' => '123456',
+                ],
+            ],
+        ]);
         App::start();
     }
 }

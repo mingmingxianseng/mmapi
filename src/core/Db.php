@@ -11,13 +11,9 @@ namespace mmapi\core;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\RedisCache;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
-use mmapi\cache\DbCache;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Db
 {
@@ -137,7 +133,7 @@ class Db
     {
         try {
             $this->entityManager->flush();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new AppException($e->getMessage(), $e->getCode(), $e->getTrace());
         }
     }
@@ -240,5 +236,10 @@ class Db
     public function getEntityManager()
     {
         return $this->entityManager;
+    }
+
+    public function transactional(\Closure $callback)
+    {
+        $this->entityManager->getConnection()->transactional($callback);
     }
 }
