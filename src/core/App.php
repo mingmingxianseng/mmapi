@@ -116,13 +116,16 @@ class  App
      */
     static private function lastLog()
     {
-        $file_load  = ' [File loaded :' . count(get_included_files()) . ']';
-        $server     = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '0.0.0.0';
-        $remote     = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-        $method     = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI';
-        $timeloaded = sprintf("[ time: %.6f s]", microtime(true) - START_TIME);
+        $info = __URL__;
+        isset($_SERVER['SERVER_ADDR']) and $info .= "\t" . $_SERVER['SERVER_ADDR'];
+        isset($_SERVER['REMOTE_ADDR']) and $info .= "\t" . $_SERVER['REMOTE_ADDR'];
+        $info .= sprintf(
+            "\t%s\t[File loaded: %d ]\t[ time: %.6f s]",
+            (isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI'),
+            count(get_included_files()),
+            microtime(true) - START_TIME
+        );
 
-        $info = __URL__ . "\t{$server}\t{$remote}\t{$method}\t$file_load\t$timeloaded";
         Log::write($info, Log::INFO);
         Log::save();
     }

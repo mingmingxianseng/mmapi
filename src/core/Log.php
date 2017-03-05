@@ -88,6 +88,9 @@ class Log
         if (self::$config['status'] === false) {
             return;
         }
+        if (empty(self::$log[$type])) {
+            $msg = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n" . $msg;
+        }
         self::$log[$type][] = $msg;
     }
 
@@ -103,8 +106,6 @@ class Log
 
     /**
      * 保存调试信息
-     *
-     * @return bool
      */
     public static function save()
     {
@@ -125,15 +126,9 @@ class Log
                     }
                 }
             }
-            $result = self::$driver->save($log);
-            if ($result) {
-                self::$log = [];
-            }
-
-            return $result;
+            self::$driver->save($log);
         }
 
-        return true;
     }
 
     /**

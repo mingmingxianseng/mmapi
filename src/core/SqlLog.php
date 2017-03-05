@@ -38,14 +38,14 @@ class SqlLog implements SQLLogger
         $this->start_time = microtime(true);
         $sql              = "[" . self::$num . "] " . $sql;
         if (null !== $params) {
-            $i   = 0;
-            $sql = preg_replace_callback('/\?/', function () use ($params, &$i) {
-                if (($val = $params[$i]) instanceof \DateTime) {
-                    return $val->format('Y-m-d H:i:s');
-                }
-                $i++;
+            $paramsArray = $this->normalizeParams($params);
+            $paramsArray->count() > 0
+            and
+            $sql = preg_replace_callback('/\?/', function () use ($paramsArray) {
+                $current = $paramsArray->current();
+                $paramsArray->next();
 
-                return $val;
+                return $current;
             }, $sql);
         }
         $this->sql = $sql;
@@ -65,35 +65,46 @@ class SqlLog implements SQLLogger
      *
      * @param array $params
      *
-     * @return array
+     * @return \ArrayIterator
      */
     private function normalizeParams(array $params)
     {
+        $data = [];
         foreach ($params as $index => $param) {
             // normalize recursively
-            if (is_array($param)) {
-                $params[$index] = $this->normalizeParams($param);
-                continue;
-            }
 
-            if (!is_string($params[$index])) {
-                continue;
-            }
+            switch (gettype($param)) {
+                case 'object':
+                    if ($param instanceof \DateTime) {
+                        $data[$index] = $param->format('Y-m-d H:i:s');
+                    } else {
+                        $data[$index] = "[object]";
+                    }
+                    break;
+                case 'NULL':
+                    $data[$index] = 'null';
+                    break;
+                default:
+                    $param = (string)$param;
+                    // non utf-8 strings break json encoding
+                    if (!preg_match('//u', $params[$index])) {
+                        $data[$index] = self::BINARY_DATA_VALUE;
+                        continue;
+                    }
 
-            // non utf-8 strings break json encoding
-            if (!preg_match('//u', $params[$index])) {
-                $params[$index] = self::BINARY_DATA_VALUE;
-                continue;
-            }
-
-            // detect if the too long string must be shorten
-            if (self::MAX_STRING_LENGTH < mb_strlen($params[$index], 'UTF-8')) {
-                $params[$index] = mb_substr($params[$index], 0, self::MAX_STRING_LENGTH - 6, 'UTF-8') . ' [...]';
-                continue;
+                    // detect if the too long string must be shorten
+                    if (self::MAX_STRING_LENGTH < mb_strlen($params[$index], 'UTF-8')) {
+                        $data[$index] = mb_substr($params[$index], 0, self::MAX_STRING_LENGTH - 6, 'UTF-8') . ' [...]';
+                        continue;
+                    }
+                    if (!is_numeric($param)) {
+                        $param = "'" . addslashes($param) . "'";
+                    }
+                    $data[$index] = $param;
             }
         }
 
-        return $params;
+        return new \ArrayIterator($data);
     }
 
 }

@@ -24,6 +24,7 @@ class File
     const COLOR_GREY = Color::GREY;
     const COLOR_END = Color::END;
 
+    const DEVIDER = "-------------------------------------------------------------------------------------\r\n";
     protected $config = [
         //开关
         'status'      => true,
@@ -67,7 +68,7 @@ class File
         $destination = $this->config['filepath'];
         $info        = '';
         foreach ($log as $type => $val) {
-            $level = '';
+            $level = "";
 
             foreach ($val as $msg) {
                 if (!is_string($msg)) {
@@ -80,14 +81,14 @@ class File
             }
 
             if (isset($this->config['apart_level'][$type])) {
-                error_log("[{$now}] {$this->config['suffix']} \t{$level}", 3, $this->config['apart_level'][$type]);
+                error_log("[{$now}] {$this->config['suffix']} {$level}" . self::DEVIDER, 3, $this->config['apart_level'][$type]);
             } else {
                 $info .= $level;
             }
 
         }
         if ($info) {
-            return error_log("[{$now}] {$this->config['suffix']} \t{$info}", 3, $destination);
+            return error_log("[{$now}] {$this->config['suffix']} \t{$info}" . self::DEVIDER, 3, $destination);
         }
 
         return true;
