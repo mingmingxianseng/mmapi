@@ -238,8 +238,19 @@ class Db
         return $this->entityManager;
     }
 
+    /**
+     * @desc   transactional
+     * @author chenmingming
+     *
+     * @param \Closure $callback
+     */
     public function transactional(\Closure $callback)
     {
-        $this->entityManager->getConnection()->transactional($callback);
+        $closure = \Closure::bind(function () use ($callback) {
+            $callback();
+            $this->flush();
+        }, $this);
+
+        $this->entityManager->getConnection()->transactional($closure);
     }
 }
