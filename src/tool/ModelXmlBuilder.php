@@ -167,7 +167,7 @@ class ModelXmlBuilder
         return $str;
     }
 
-    protected function underline2Camel($str)
+    public function underline2Camel($str)
     {
         return lcfirst(str_replace('_', '', ucwords($str, '_')));
     }
@@ -176,15 +176,15 @@ class ModelXmlBuilder
     {
         if (strpos($type, 'int') !== false) {
             return 'type="integer" ';
-        } elseif (strpos($type, 'char') !== false) {
+        } elseif (strpos($type, 'char') !== false || strpos($type, 'enum') !== false) {
             preg_match('/[0-9]+/', $type, $match);
             $num = $match[0];
 
             return 'type="string" length="' . $num . '" ';
 
-        } elseif (in_array($type, ['date', 'datetime', 'time', 'timestamp']) || strpos($type, 'enum') !== false) {
+        } elseif (in_array($type, ['date', 'datetime', 'time', 'timestamp'])) {
 
-            return 'type="string" ';
+            return 'type="datetime" ';
         } elseif (strpos($type, 'decimal') !== false || strpos($type, 'float') !== false) {
             preg_match('/\(([0-9]+?),([0-9]+)\)/', $type, $match);
             $scale     = $match[0][1];

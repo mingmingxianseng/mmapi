@@ -276,7 +276,7 @@ abstract class Response
      */
     public function getContent()
     {
-        if (null == $this->content) {
+        if (null === $this->content) {
             $this->parseContent();
         }
 
