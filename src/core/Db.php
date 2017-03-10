@@ -58,10 +58,14 @@ class Db
                 default:
                     throw new AppException("only support memcache|memcached|redis");
             }
-            $dbCache->setNamespace(Cache::store()->getPrefix());
+            $dbCache->setNamespace('db_' . md5(Cache::store()->getPrefix()) . '_');
         }
 
-        $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null, $dbCache);
+        $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null);
+
+        $config->setMetadataCacheImpl($dbCache);
+        $config->setQueryCacheImpl($dbCache);
+        $config->setResultCacheImpl($dbCache);
         $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));
         $config->setSQLLogger(new SqlLog());
         try {
