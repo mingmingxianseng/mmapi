@@ -99,7 +99,7 @@ class ParseParams implements Params
         $value = $param->getValue();
         $field = $param->getKey();
         if (null === $value) {
-            if (!$param->isRequire() && $param->getDefault()) {
+            if (!$param->isRequire() && !is_null($param->getDefault())) {
                 $value = $param->getDefault();
             }
         }
