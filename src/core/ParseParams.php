@@ -13,6 +13,7 @@ class ParseParams implements Params
     //是否开始调试
     /** @var ApiParams[] */
     protected $params = [];
+
     /**
      * @desc   parse
      * @author chenmingming
@@ -21,9 +22,10 @@ class ParseParams implements Params
     {
         foreach ($this->params as $param) {
             $param->parse();
-            $this->setField($param->getKey(), $param->getValue());
+            $this->setField($param);
         }
     }
+
     /**
      * @desc   setParams 设置参数
      * @author chenmingming
@@ -90,14 +92,19 @@ class ParseParams implements Params
      * @desc   setField
      * @author chenmingming
      *
-     * @param string $field 属性
-     * @param mixed  $value 值
+     * @param ApiParams $param 属性
      */
-    private function setField($field, $value)
+    private function setField(ApiParams $param)
     {
+        $value = $param->getValue();
+        $field = $param->getKey();
+        if (null === $value) {
+            if (!$param->isRequire() && $param->getDefault()) {
+                $value = $param->getDefault();
+            }
+        }
         $this->$field = $value;
     }
-
 
     /**
      * @desc   __get 获取值

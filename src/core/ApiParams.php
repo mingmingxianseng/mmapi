@@ -269,7 +269,6 @@ class ApiParams implements Params
                 $this->specialException('require');
                 throw new ApiException("参数{$this->key}必须传递，且不能为空 方式:{$this->method}", 'API_PARAM_MUST');
             }
-            is_null($this->default) || $this->value = $this->default;
         } else {
             $this->formatValue();
         }
@@ -401,11 +400,11 @@ class ApiParams implements Params
     /**
      * @desc   __toString
      * @author chenmingming
-     * @return mixed
+     * @return string
      */
     public function __toString()
     {
-        return $this->value;
+        return (string)$this->value;
     }
 
     /**
