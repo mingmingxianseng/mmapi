@@ -15,7 +15,7 @@ class ApiParams implements Params
 
     protected $key = '';
     //参数传递方式
-    protected $method = self::METHOD_REQUEST;
+    protected $method;
     //参数是否必传
     protected $is_require = true;
     //参数类型
@@ -29,6 +29,10 @@ class ApiParams implements Params
     //参数的值
     protected $value;
 
+    /**
+     * @var string 全局默认传参方式
+     */
+    static private $globalMethod = self::METHOD_REQUEST;
     /**
      * @var array 异常
      */
@@ -124,6 +128,10 @@ class ApiParams implements Params
      */
     public function getMethod()
     {
+        if (is_null($this->method)) {
+            $this->setMethod(self::$globalMethod);
+        }
+
         return $this->method;
     }
 
@@ -315,7 +323,7 @@ class ApiParams implements Params
      */
     private function searchValue()
     {
-        switch ($this->method) {
+        switch ($this->getMethod()) {
             case self::METHOD_REQUEST:
                 if (!isset($_REQUEST[$this->key])) {
                     return false;
@@ -419,7 +427,7 @@ class ApiParams implements Params
      * @desc   setValidateException
      * @author chenmingming
      *
-     * @param array|\Exception $exception|string 异常
+     * @param array|\Exception $exception |string 异常
      *
      * @return $this
      */
@@ -435,7 +443,7 @@ class ApiParams implements Params
      * @author chenmingming
      *
      * @param array|\Exception|string $exception 异常
-     * @param string           $type      异常类型
+     * @param string                  $type      异常类型
      */
     protected function setException($exception, $type)
     {
@@ -456,6 +464,19 @@ class ApiParams implements Params
     {
         if (isset($this->exception[$type]) && $this->exception[$type] instanceof \Exception) {
             throw $this->exception[$type];
+        }
+    }
+
+    /**
+     * @desc   setDefaultMethod
+     * @author chenmingming
+     *
+     * @param string $method
+     */
+    static public function setGlobalMethod($method)
+    {
+        if (in_array($method, [self::METHOD_REQUEST, self::METHOD_COOKIE, self::METHOD_GET, self::METHOD_POST])) {
+            self::$globalMethod = $method;
         }
     }
 }
