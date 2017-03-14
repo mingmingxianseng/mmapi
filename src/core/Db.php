@@ -14,6 +14,8 @@ use Doctrine\Common\Cache\RedisCache;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use mmapi\cache\driver\Memcached;
+use mmapi\cache\driver\Redis;
 
 class Db
 {
@@ -40,25 +42,22 @@ class Db
         $this->db_name = isset($options['name']) ? $options['name'] : md5(serialize($options));
 
         $dbCache = null;
-        if (!isset($this->options['no_cache'])) {
-            $handle = Cache::store()->handler();
-            switch (get_class($handle)) {
-                case \Redis::class:
+        if (isset($this->options['cache'])) {
+            $cache_options = $this->options['cache'];
+            switch (strtolower($cache_options['type'])) {
+                case 'redis':
                     $dbCache = new RedisCache();
-                    $dbCache->setRedis($handle);
+                    $dbCache->setRedis((new Redis($cache_options))->handler());
+
                     break;
-                case \Memcache::class:
-                    $dbCache = new MemcacheCache();
-                    $dbCache->setMemcache($handle);
-                    break;
-                case \Memcached::class:
-                    $dbCache = new MemcachedCache();
-                    $dbCache->setMemcached($handle);
+                case 'memcached':
+                    $dbCache = new MemcachedCache($cache_options);
+                    $dbCache->setMemcached((new Memcached($cache_options))->handler());
                     break;
                 default:
-                    throw new AppException("only support memcache|memcached|redis");
+                    throw new AppException("only support memcached|redis");
             }
-            $dbCache->setNamespace('db_' . md5(Cache::store()->getPrefix()) . '_');
+            $dbCache->setNamespace('db_' . $cache_options['namespace']);
         }
 
         $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null);
@@ -88,8 +87,9 @@ class Db
     static public function create($name = 'default')
     {
         if (!isset(self::$instances[$name])) {
-            $conf         = Config::get('db.' . $name);
-            $conf['name'] = $name;
+            $conf          = Config::get('db.' . $name);
+            $conf['name']  = $name;
+            $conf['cache'] = Config::get('db_cache');
             new self($conf);
         }
 
