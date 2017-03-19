@@ -89,7 +89,7 @@ class Log
             return;
         }
         if (empty(self::$log[$type])) {
-            $msg = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n" . $msg;
+            self::$log[$type][] = ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
         }
         self::$log[$type][] = $msg;
     }
