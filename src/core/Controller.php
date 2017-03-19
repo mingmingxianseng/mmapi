@@ -129,4 +129,13 @@ abstract class Controller extends ParseParams
     {
     }
 
+    /**
+     * @desc   getResponse
+     * @author chenmingming
+     * @return View
+     */
+    protected function getResponse()
+    {
+        return $this->reponse;
+    }
 }
