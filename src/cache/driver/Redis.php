@@ -145,7 +145,12 @@ class Redis extends Driver
     {
         $key = $this->getCacheKey($name);
 
-        return $this->handler->incrBy($key, $step);
+        $rs = $this->handler->incrBy($key, $step);
+        if ($expire) {
+            $this->handler->expire($key, $expire);
+        }
+
+        return $rs;
     }
 
     /**
