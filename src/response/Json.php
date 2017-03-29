@@ -121,7 +121,7 @@ class Json extends Response
             // 返回JSON数据格式到客户端 包含状态信息
             $this->content = json_encode(
                 $this->data
-                , $this->options['json_encode_param'] == true
+                , $this->options['json_encode_param']
             );
 
             if ($this->content === false) {
