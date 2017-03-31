@@ -39,7 +39,7 @@ class Memcached extends Driver
             throw new \BadFunctionCallException('not support: memcached');
         }
         if (!empty($options)) {
-            $this->options = array_merge($this->options, $options);
+            $this->options = array_replace($this->options, $options);
         }
         $this->handler = new \Memcached;
         if (!empty($this->options['option'])) {
@@ -219,4 +219,22 @@ class Memcached extends Driver
 
         return $this->handler->flush();
     }
+
+    /**
+     * @desc   add
+     * @author chenmingming
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $expire
+     *
+     * @return bool
+     */
+    public function add(string $key, $value, int $expire = 0): bool
+    {
+        $key = $this->getCacheKey($key);
+
+        return $this->handler->add($key, $value, $expire);
+    }
+
 }

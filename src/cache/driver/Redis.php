@@ -47,7 +47,7 @@ class Redis extends Driver
             throw new \BadFunctionCallException('not support: redis');
         }
         if (!empty($options)) {
-            $this->options = array_merge($this->options, $options);
+            $this->options = array_replace($this->options, $options);
         }
         $func          = $this->options['persistent'] ? 'pconnect' : 'connect';
         $this->handler = new \Redis;
@@ -207,6 +207,27 @@ class Redis extends Driver
         }
 
         return $this->handler->flushDB();
+    }
+
+    /**
+     * @desc   add
+     * @author chenmingming
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $expire
+     *
+     * @return bool
+     */
+    public function add(string $key, $value, int $expire = 0): bool
+    {
+        $key = $this->getCacheKey($key);
+        $rs  = $this->handler->setnx($key, $value);
+        if ($rs && $expire > 0) {
+            $this->handler->expire($key, $expire);
+        }
+
+        return $rs;
     }
 
 }

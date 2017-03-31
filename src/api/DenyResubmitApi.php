@@ -112,9 +112,8 @@ abstract class DenyResubmitApi extends Api
         if ($this->options[self::OPT_DENY_RESUBMIT]) {
             $this->initResubmit();
             //已经开启防止重复提交
-            $queueNum = Cache::inc($this->getDenyResubmitKey(), 1, $this->options[self::OPT_DENY_RESUBMIT]['expire']);
-            $this->debug('queueNum', $queueNum);
-            if ($queueNum !== 1) {
+            $result = Cache::add($this->getDenyResubmitKey(), 'ddos', $this->options[self::OPT_DENY_RESUBMIT]['expire']);
+            if (false === $result) {
                 throw new ApiException(
                     $this->options[self::OPT_DENY_RESUBMIT]['msg'],
                     $this->options[self::OPT_DENY_RESUBMIT]['code']

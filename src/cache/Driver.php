@@ -259,4 +259,16 @@ abstract class Driver
     {
         return $this->options['prefix'];
     }
+
+    /**
+     * @desc   add 等价于set 但是如果key已经存在 则返回false
+     * @author chenmingming
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $expire
+     *
+     * @return bool
+     */
+    abstract public function add(string $key, $value, int $expire = 0): bool;
 }
