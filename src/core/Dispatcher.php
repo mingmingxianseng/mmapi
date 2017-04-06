@@ -25,14 +25,21 @@ class Dispatcher
             $class = $namespace . "\\" . $class;
         }
         if (!class_exists($class)) {
-            throw new AppException("模块{$class}不存在", 'module_not_fund', $action);
+            $class = preg_replace('/\\\\[a-zA-Z0-9]+$/', '\\' . Config::get('dispatcher.default_index', 'index'), $class);
+            if (!class_exists($class)) {
+                throw new AppException("path {$action} missing ", 'module_not_fund', $action);
+            }
+        }
+        $reflect = new \ReflectionClass($class);
+        if (!$reflect->isInstantiable()) {
+            throw new AppException("path {$class} is not a instance~", 'module_not_instance');
         }
         $ajax   = new $class();
         $method = Config::get('dispatcher.method', 'main');
         if (method_exists($ajax, $method)) {
             $ajax->$method();
         } else {
-            throw new AppException("模块{$class}不合法", 'module_invalid');
+            throw new AppException("path {$class} invalid", 'module_invalid');
         }
     }
 }
