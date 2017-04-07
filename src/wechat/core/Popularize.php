@@ -76,6 +76,8 @@ class Popularize extends Base
         return $this->wechat->getHttp()
             ->setPrameter('ticket', $ticket)
             ->setUrl('https://mp.weixin.qq.com/cgi-bin/showqrcode')
+            ->withoutJsonDecode()
+            ->withoutCheck()
             ->get();
     }
 

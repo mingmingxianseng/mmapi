@@ -297,7 +297,8 @@ class Wechat
     {
         if ($this->validateSignature()) {
             //接受并解析微信中心POST发送XML数据
-            $xml = (array)simplexml_load_string($GLOBALS['HTTP_RAW_POST_DATA'], 'SimpleXMLElement', LIBXML_NOCDATA);
+            $content = file_get_contents('php://input');
+            $xml     = (array)simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
 
             $this->log($xml, 'receive-xml');
 

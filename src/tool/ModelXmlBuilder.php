@@ -191,7 +191,7 @@ class ModelXmlBuilder
             $precision = $match[0][2];
 
             return "type=\"decimal\" scale=\"{$scale}\" precision=\"{$precision}\" ";
-        } elseif (in_array($type, ['text'])) {
+        } elseif (in_array($type, ['text','longtext'])) {
             return 'type="string" length="65535" ';
         } else {
             throw new AppException('不支持的字段类型' . $type);
