@@ -152,7 +152,6 @@ class ApiParams implements Params
             self::METHOD_POST,
             self::METHOD_REQUEST,
             self::METHOD_BODY,
-            self::METHOD_BODY_JSON,
         ])
         ) {
             throw new AppException("{$method}:参数传递方式非法", "PARAM_METHOD_INVALID");
@@ -284,9 +283,6 @@ class ApiParams implements Params
      */
     private function formatValue()
     {
-        if ($this->method == self::METHOD_BODY_JSON) {
-            $this->type = self::TYPE_ARRAY;
-        }
         switch ($this->type) {
             case self::TYPE_STRING:
                 $this->value = (string)$this->value;
@@ -354,10 +350,6 @@ class ApiParams implements Params
                 break;
             case self::METHOD_BODY:
                 $this->value = file_get_contents('php://input');
-                break;
-            case self::METHOD_BODY_JSON:
-                $json        = file_get_contents('php://input');
-                $this->value = json_decode($json, true);
                 break;
             default:
                 return false;
