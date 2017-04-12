@@ -151,6 +151,8 @@ class ApiParams implements Params
             self::METHOD_GET,
             self::METHOD_POST,
             self::METHOD_REQUEST,
+            self::METHOD_BODY,
+            self::METHOD_BODY_JSON,
         ])
         ) {
             throw new AppException("{$method}:参数传递方式非法", "PARAM_METHOD_INVALID");
@@ -282,6 +284,9 @@ class ApiParams implements Params
      */
     private function formatValue()
     {
+        if ($this->method == self::METHOD_BODY_JSON) {
+            $this->type = self::TYPE_ARRAY;
+        }
         switch ($this->type) {
             case self::TYPE_STRING:
                 $this->value = (string)$this->value;
@@ -347,6 +352,13 @@ class ApiParams implements Params
                 }
                 $this->value = $_COOKIE[$this->key];
                 break;
+            case self::METHOD_BODY:
+                $this->value = file_get_contents('php://input');
+                break;
+            case self::METHOD_BODY_JSON:
+                $json        = file_get_contents('php://input');
+                $this->value = json_decode($json, true);
+                break;
             default:
                 return false;
         }
@@ -364,7 +376,12 @@ class ApiParams implements Params
         $value = $this->validate_value;
         switch ($this->validate_type) {
             case self::VALIDATE_TYPE_COMMON:
-                if (method_exists(Validate::class, $value) && Validate::$value($this->value) === false) {
+                if ($value instanceof \Closure) {
+                    if (!$value($this->value)) {
+                        $this->specialException('validate');
+                        throw new ApiException("{$this->key}:{$this->value} 简单验证不合法", 'VALIDATE_COMMON_INVALID');
+                    }
+                } else if (method_exists(Validate::class, $value) && Validate::$value($this->value) === false) {
                     $this->specialException('validate');
                     throw new ApiException("{$this->key}:{$this->value} 简单验证不合法", 'VALIDATE_COMMON_INVALID');
                 }
