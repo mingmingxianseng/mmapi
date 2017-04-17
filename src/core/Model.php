@@ -11,6 +11,7 @@ namespace mmapi\core;
 abstract class Model
 {
     const DB_INI = 'default';
+
     /**
      * @desc   getInstance 获取一个实例
      * @author chenmingming
@@ -50,7 +51,7 @@ abstract class Model
      */
     public function persist()
     {
-        return DB::create(static::DB_INI)->save($this);
+        return Db::create(static::DB_INI)->save($this);
     }
 
     /**
@@ -60,7 +61,7 @@ abstract class Model
      */
     public function remove()
     {
-        return DB::create(static::DB_INI)->remove($this);
+        return Db::create(static::DB_INI)->remove($this);
     }
 
     /**
