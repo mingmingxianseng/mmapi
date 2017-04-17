@@ -95,8 +95,6 @@ class  App
         if (!headers_sent() && DEBUG) {
             Response::create()->exception($e);
         }
-
-        self::lastLog();
     }
 
     // 致命错误捕获
