@@ -5,6 +5,7 @@
  * Date: 2016/12/12
  * Time: 11:22
  */
+
 namespace mmapi\core;
 
 class  App
@@ -90,6 +91,7 @@ class  App
         }
         if (!in_array(get_class($e), Config::get('no_logged_exception'))) {
             Log::error("[{$errno}]:{$e->getMessage()}");
+            Log::error("@{$e->getFile()} +{$e->getLine()}");
             Log::error("trace:\r\n" . var_export(explode("\n", $e->getTraceAsString()), true));
         }
         if (!headers_sent() && DEBUG) {

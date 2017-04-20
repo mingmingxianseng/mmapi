@@ -63,7 +63,10 @@ class Json extends Response
         }
         $this
             ->set('msg', $e->getMessage())
-            ->set('data', explode("\n", $e->getTraceAsString()))
+            ->set('data', array_merge(
+                    ["@{$e->getFile()} +{$e->getLine()}"]
+                    , explode("\n", $e->getTraceAsString()))
+            )
             ->send();
     }
 

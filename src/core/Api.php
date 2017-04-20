@@ -92,14 +92,20 @@ abstract class Api extends ParseParams
         if ($this->getOption(self::OPT_DEBUG)) {
             $this
                 ->set('exception', get_class($e))
-                ->set('trace', explode("\n", $e->getTraceAsString()));
+                ->set('trace', array_merge(
+                        ["@{$e->getFile()} +{$e->getLine()}"]
+                        , explode("\n", $e->getTraceAsString()))
+                );
             method_exists($e, 'getDetail')
             &&
             $this->set('detail', $e->getDetail());
         }
         $errno = method_exists($e, 'getErrno') ? $e->getErrno() : 'ERROR';
 
-        $this->set('msg', $e->getMessage())->set('code', $errno)->send();
+        $this
+            ->set('msg', $e->getMessage())
+            ->set('code', $errno)
+            ->send();
         App::handleException($e);
     }
 

@@ -69,7 +69,10 @@ class View extends Response
         }
         $this
             ->set('msg', $e->getMessage())
-            ->set('data', explode("\n", $e->getTraceAsString()));
+            ->set('data', array_merge(
+                    ["@{$e->getFile()} +{$e->getLine()}"]
+                    , explode("\n", $e->getTraceAsString()))
+            );
         $this->content = $twig->render('exception.twig', $this->data);
         $this->send();
     }
