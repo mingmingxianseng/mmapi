@@ -1,0 +1,29 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: chenmingming
+ * Date: 2017/5/8
+ * Time: 10:52
+ */
+
+namespace mmapi\model\validate;
+
+use mmapi\model\InvalidFieldValue;
+
+class DatetimeType extends Type
+{
+    protected function checkNull()
+    {
+        if ($this->fieldInfo['nullable'] === false && is_null($this->value)) {
+            $this->rfField->setValue($this->object, new \DateTime());
+        }
+    }
+
+    function checkRange()
+    {
+        if (!($this->value instanceof \DateTime)) {
+            throw new InvalidFieldValue("{$this->getFieldName()} 请输入正确的时间格式", 'FIELD_NOT_DATETIME');
+        }
+    }
+
+}

@@ -16,6 +16,7 @@ use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use mmapi\cache\driver\Memcached;
 use mmapi\cache\driver\Redis;
+use mmapi\model\InvalidFieldValue;
 
 class Db
 {
@@ -61,14 +62,18 @@ class Db
         }
 
         $config = Setup::createConfiguration($this->options['is_dev_mode'] == true, null);
+        if ($dbCache) {
+            $config->setMetadataCacheImpl($dbCache);
+            $config->setQueryCacheImpl($dbCache);
+            $config->setResultCacheImpl($dbCache);
+        }
+        array_push($this->options['path'], dirname(__DIR__) . '/model/xml');
 
-        $config->setMetadataCacheImpl($dbCache);
-        $config->setQueryCacheImpl($dbCache);
-        $config->setResultCacheImpl($dbCache);
         $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));
         $config->setSQLLogger(new SqlLog());
         try {
             $this->entityManager = EntityManager::create($this->options['conn'], $config);
+
         } catch (\Exception $e) {
             throw new AppException("创建DB实例失败，请检查实例", 'DB_CREATE_FAILED', $this->options);
         }
@@ -137,6 +142,8 @@ class Db
     {
         try {
             $this->entityManager->flush();
+        } catch (AppException $e) {
+            throw $e;
         } catch (\Exception $e) {
             throw new AppException($e->getMessage(), $e->getCode(), $e->getTrace());
         }
