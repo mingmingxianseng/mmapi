@@ -118,7 +118,7 @@ class  App
     {
         $info = __URL__;
         isset($_SERVER['SERVER_ADDR']) and $info .= "\t" . $_SERVER['SERVER_ADDR'];
-        isset($_SERVER['REMOTE_ADDR']) and $info .= "\t" . $_SERVER['REMOTE_ADDR'];
+        isset($_SERVER['REMOTE_ADDR']) and $info .= "\t" . self::getRealUserIp();
         $info .= sprintf(
             "\t%s\t[File loaded: %d ]\t[ time: %.6f s]",
             (isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI'),
@@ -128,6 +128,30 @@ class  App
 
         Log::write($info, Log::INFO);
         Log::save();
+    }
+
+    /**
+     * @desc   getUserIp
+     * @author chenmingming
+     * @return string
+     */
+    static public function getRealUserIp()
+    {
+        static $ip;
+        if (null === $ip) {
+            $ip  = '';
+            $arr = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR'];
+            foreach ($arr as $k) {
+                $_ip = explode(',', $_SERVER[$k], 2)[0];
+                if (filter_var($_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                    $ip = $_ip;
+                    break;
+                }
+            }
+        }
+
+        return $ip;
+
     }
 
     /**
