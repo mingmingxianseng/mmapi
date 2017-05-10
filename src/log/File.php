@@ -71,7 +71,9 @@ class File
             $level = "";
 
             foreach ($val as $msg) {
-                if (!is_string($msg)) {
+                if ($msg instanceof \Exception) {
+                    $msg = $msg->__toString();
+                } elseif (!is_string($msg)) {
                     $msg = var_export($msg, true);
                 }
                 $level .= '[ ' . $type . ' ] ' . $msg . "\r\n";
@@ -87,9 +89,8 @@ class File
             }
 
         }
-        if ($info) {
-            return error_log("[{$now}] {$this->config['suffix']} \t{$info}" . self::DEVIDER, 3, $destination);
-        }
+        if ($info)
+            return error_log("[{$now}]{$this->config['suffix']}\t{$info}" . self::DEVIDER, 3, $destination);
 
         return true;
 

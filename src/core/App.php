@@ -84,15 +84,8 @@ class  App
      */
     static public function handleException($e)
     {
-        if ($e instanceof AppException) {
-            $errno = $e->getErrno();
-        } else {
-            $errno = $e->getCode();
-        }
         if (!in_array(get_class($e), Config::get('no_logged_exception'))) {
-            Log::error("[{$errno}]:{$e->getMessage()}");
-            Log::error("@{$e->getFile()} +{$e->getLine()}");
-            Log::error("trace:\r\n" . var_export(explode("\n", $e->getTraceAsString()), true));
+            Log::error($e);
         }
         if (!headers_sent() && DEBUG) {
             Response::create()->exception($e);
