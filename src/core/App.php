@@ -38,11 +38,14 @@ class  App
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
         );
         define('IS_CLI', PHP_SAPI == 'cli');
-        IS_CLI ? define('__URL__', 'cli') : define('__URL__',
-            (isset($_SERVER['HTTPS']) ? "https://" : "http://")
-            . ($_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR'])
-            . $_SERVER['REQUEST_URI']
-        );
+        if (IS_CLI) {
+            $url = 'CMD "' . implode(" ", $_SERVER['argv']) . '"';
+        } else {
+            $url = (isset($_SERVER['HTTPS']) ? "https://" : "http://")
+                . ($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_ADDR'])
+                . $_SERVER['REQUEST_URI'];
+        }
+        define('__URL__', $url);
 
         self::loadConf();
         defined('DEBUG') || define('DEBUG', Config::get('debug') == true);
@@ -109,17 +112,17 @@ class  App
      */
     static private function lastLog()
     {
-        $info = __URL__;
-        isset($_SERVER['SERVER_ADDR']) and $info .= "\t" . $_SERVER['SERVER_ADDR'];
-        isset($_SERVER['REMOTE_ADDR']) and $info .= "\t" . self::getRealUserIp();
-        $info .= sprintf(
+        $info[]   = __URL__;
+        $info[] = $_SERVER['SERVER_ADDR'] ??'';
+        $info[] = self::getRealUserIp() ?? '';
+        $info[] = sprintf(
             "\t%s\t[File loaded: %d ]\t[ time: %.6f s]",
-            (isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI'),
+            $_SERVER['REQUEST_METHOD'] ?? 'CLI',
             count(get_included_files()),
             microtime(true) - START_TIME
         );
 
-        Log::write($info, Log::INFO);
+        Log::write(implode("\t", array_filter($info)), Log::INFO);
         Log::save();
     }
 

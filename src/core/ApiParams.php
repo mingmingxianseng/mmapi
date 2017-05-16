@@ -9,6 +9,7 @@
 namespace mmapi\core;
 
 use mmapi\api\ApiException;
+use mmapi\api\ParameterException;
 
 class ApiParams implements Params
 {
@@ -266,14 +267,13 @@ class ApiParams implements Params
     {
         $this->searchValue();
         if (is_null($this->value)) {
-            if ($this->isRequire()) {
-                $this->specialException('require');
-                throw new ApiException("参数{$this->key}必须传递，且不能为空 方式:{$this->method}", 'API_PARAM_MUST');
-            }
+            if ($this->isRequire())
+                throw $this->specialException('require') ?? (ParameterException::notAllowNull($this));
         } else {
             $this->formatValue();
+            $this->validate();
         }
-        $this->validate();
+
     }
 
     /**
@@ -284,78 +284,63 @@ class ApiParams implements Params
     private function formatValue()
     {
         switch ($this->type) {
-            case self::TYPE_STRING:
-                $this->value = (string)$this->value;
-                break;
-            case self::TYPE_INT:
-                $this->value = (int)$this->value;
-                break;
-            case self::TYPE_FLOAT:
 
+            case self::TYPE_FLOAT:
                 if (!Validate::isFloat($this->value)) {
-                    $this->specialException('validate');
-                    throw new ApiException("参数{$this->key}:{$this->value}非浮点数", 'APIPARAM_NOT_FLOAT');
+                    throw $this->specialException('validate') ?? (ParameterException::typeInvalid($this));
                 }
                 $this->value = (float)$this->value;
+                break;
+            case self::TYPE_INT:
+                if (!Validate::isInt($this->value)) {
+                    throw $this->specialException('validate') ?? (ParameterException::typeInvalid($this));
+                }
+                $this->value = (int)$this->value;
                 break;
             case self::TYPE_JSON:
                 json_decode($this->value);
                 if (json_last_error() != JSON_ERROR_NONE) {
-                    $this->specialException('validate');
-                    throw new ApiException("参数{$this->key}:{$this->value}非json字符串", 'APIPARAM_NOT_JSON');
+                    throw $this->specialException('validate') ?? (ParameterException::typeInvalid($this));
                 }
                 break;
             case self::TYPE_ARRAY:
                 if (!is_array($this->value)) {
-                    $this->specialException('validate');
-                    throw new ApiException("参数{$this->key}:{$this->value}非数组", 'APIPARAM_NOT_ARRAY');
+                    throw $this->specialException('validate') ?? (ParameterException::typeInvalid($this));
                 }
                 break;
             default:
-                throw new ApiException("非法的参数类型", 'APIPARAM_INVALID');
+                $this->value = (string)$this->value;
         }
     }
 
     /**
      * @desc   searchValue 获取值
      * @author chenmingming
-     * @return bool
      */
     private function searchValue()
     {
+        $from = null;
         switch ($this->getMethod()) {
             case self::METHOD_REQUEST:
-                if (!isset($_REQUEST[$this->key])) {
-                    return false;
-                }
-                $this->value = $_REQUEST[$this->key];
+                $from = $_REQUEST;
                 break;
             case self::METHOD_POST:
-                if (!isset($_POST[$this->key])) {
-                    return false;
-                }
-                $this->value = $_POST[$this->key];
+                $from = $_POST;
                 break;
             case self::METHOD_GET:
-                if (!isset($_GET[$this->key])) {
-                    return false;
-                }
-                $this->value = $_GET[$this->key];
+                $from = $_GET;
                 break;
             case self::METHOD_COOKIE:
-                if (!isset($_COOKIE[$this->key])) {
-                    return false;
-                }
-                $this->value = $_COOKIE[$this->key];
+                $from = $_COOKIE;
                 break;
             case self::METHOD_BODY:
                 $this->value = file_get_contents('php://input');
-                break;
-            default:
-                return false;
-        }
 
-        return true;
+                return;
+            default:
+                return;
+        }
+        $this->value = $from[$this->key] ?? null;
     }
 
     /**
@@ -368,27 +353,27 @@ class ApiParams implements Params
         $value = $this->validate_value;
         switch ($this->validate_type) {
             case self::VALIDATE_TYPE_COMMON:
-                if ($value instanceof \Closure) {
-                    if (!$value($this->value)) {
-                        $this->specialException('validate');
-                        throw new ApiException("{$this->key}:{$this->value} 简单验证不合法", 'VALIDATE_COMMON_INVALID');
-                    }
-                } else if (method_exists(Validate::class, $value) && Validate::$value($this->value) === false) {
-                    $this->specialException('validate');
-                    throw new ApiException("{$this->key}:{$this->value} 简单验证不合法", 'VALIDATE_COMMON_INVALID');
+                if (
+                    ($value instanceof \Closure && !$value($this->value))
+                    OR
+                    (
+                        method_exists(Validate::class, $value)
+                        &&
+                        Validate::$value($this->value) === false
+                    )
+                ) {
+                    throw $this->specialException('validate')??(ParameterException::simpleValidateFailed($this));
                 }
                 break;
             case self::VALIDATE_TYPE_IN:
 
                 if (!in_array($this->value, $value)) {
-                    $this->specialException('validate');
-                    throw new ApiException("{$this->value} 不在合法范围内...", 'VALIDATE_NOT_IN_VALID');
+                    throw $this->specialException('validate') ?? ParameterException::typeInvalid($this);
                 }
                 break;
             case self::VALIDATE_TYPE_REG:
                 if (!preg_match($value, $this->value)) {
-                    $this->specialException('validate');
-                    throw new ApiException("{$this->value} 正则验证失败...", 'VALIDATE_REG_INVALID');
+                    throw $this->specialException('validate') ?? (ParameterException::regValidateFailed($this));
                 }
                 break;
             default:
@@ -404,16 +389,6 @@ class ApiParams implements Params
     public function add(Api $api)
     {
         $api->addParam($this);
-    }
-
-    /**
-     * @desc   __toString
-     * @author chenmingming
-     * @return string
-     */
-    public function __toString()
-    {
-        return (string)$this->value;
     }
 
     /**
@@ -435,7 +410,7 @@ class ApiParams implements Params
      * @desc   setValidateException
      * @author chenmingming
      *
-     * @param array|\Exception $exception |string 异常
+     * @param array| string |\Exception $exception 异常
      *
      * @return $this
      */
@@ -467,12 +442,16 @@ class ApiParams implements Params
      * @author chenmingming
      *
      * @param string $type 异常类型
+     *
+     * @return \Exception|null
      */
     protected function specialException($type)
     {
         if (isset($this->exception[$type]) && $this->exception[$type] instanceof \Exception) {
-            throw $this->exception[$type];
+            return $this->exception[$type];
         }
+
+        return null;
     }
 
     /**

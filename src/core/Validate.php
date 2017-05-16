@@ -75,18 +75,21 @@ class Validate
     /**
      * Check for a float number validity
      *
-     * @param float $float Float number to validate
+     * @param float $val Float number to validate
      *
      * @return bool Validity is ok or not
      */
-    public static function isFloat($float)
+    public static function isFloat($val)
     {
-        return strval((float)$float) == strval($float);
+        return self::isInt($val)
+            || is_float($val)
+            || ((float)$val > (int)$val
+                || (strlen($val) != strlen((int)$val) && (int)$val !== 0));
     }
 
     public static function isUnsignedFloat($float)
     {
-        return strval((float)$float) == strval($float) && $float >= 0;
+        return self::isFloat($float) && $float >= 0;
     }
 
     /**
@@ -181,7 +184,7 @@ class Validate
     /**
      * Check for an integer validity
      *
-     * @param int $value Integer to validate
+     * @param mixed $value Integer to validate
      *
      * @return bool Validity is ok or not
      */
@@ -199,7 +202,7 @@ class Validate
      */
     public static function isUnsignedInt($value)
     {
-        return ((string)(int)$value === (string)$value && $value < 4294967296 && $value >= 0);
+        return self::isInt($value) && $value < 4294967296 && $value >= 0;
     }
 
     /**
@@ -211,7 +214,7 @@ class Validate
      */
     public static function isPercentage($value)
     {
-        return (Validate::isFloat($value) && $value >= 0 && $value <= 100);
+        return (Validate::isUnsignedFloat($value) && $value <= 100);
     }
 
     /**

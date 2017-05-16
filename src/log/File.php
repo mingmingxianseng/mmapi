@@ -71,7 +71,7 @@ class File
             $level = "";
 
             foreach ($val as $msg) {
-                if ($msg instanceof \Exception) {
+                if (is_object($msg) && method_exists($msg, '__toString')) {
                     $msg = $msg->__toString();
                 } elseif (!is_string($msg)) {
                     $msg = var_export($msg, true);

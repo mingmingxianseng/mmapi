@@ -15,7 +15,8 @@ class DatetimeType extends Type
     protected function checkNull()
     {
         if ($this->fieldInfo['nullable'] === false && is_null($this->value)) {
-            $this->rfField->setValue($this->object, new \DateTime());
+            $this->value = new \DateTime();
+            $this->rfField->setValue($this->object, $this->value);
         }
     }
 

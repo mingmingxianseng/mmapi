@@ -90,7 +90,7 @@ abstract class Controller extends ParseParams
      * @author chenmingming
      *
      * @param string $key   key
-     * @param string $value value
+     * @param mixed $value value
      *
      * @return $this
      */
