@@ -15,7 +15,7 @@ class AppException extends \Exception
     /**
      * AppException constructor.
      *
-     * @param string $msg    错误详情
+     * @param mixed $msg    错误详情
      * @param string $errno  错误英文码
      * @param array  $detail 错误详情
      */

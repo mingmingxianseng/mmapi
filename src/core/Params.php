@@ -26,7 +26,6 @@ interface Params
     const METHOD_GET = 'get';
     const METHOD_POST = 'post';
     const METHOD_BODY = 'body';
-    const METHOD_BODY_JSON = 'body_json';
     //get post 均可
     const METHOD_REQUEST = 'request';
     const METHOD_COOKIE = 'cookie';

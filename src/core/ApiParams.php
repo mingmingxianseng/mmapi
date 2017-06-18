@@ -334,7 +334,7 @@ class ApiParams implements Params
                 $from = $_COOKIE;
                 break;
             case self::METHOD_BODY:
-                $this->value = file_get_contents('php://input');
+                $this->value = file_get_contents(Config::get('body_stream', 'php://input'));
 
                 return;
             default:
