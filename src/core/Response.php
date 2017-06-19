@@ -314,4 +314,20 @@ abstract class Response
         return $this->code;
     }
 
+    /**
+     * @desc   get
+     * @author chenmingming
+     *
+     * @param null|string $key key
+     *
+     * @return mixed
+     */
+    public function get($key = null)
+    {
+        if (null === $key) {
+            return $this->data;
+        }
+
+        return $this->data[$key] ?? null;
+    }
 }

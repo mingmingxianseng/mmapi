@@ -32,6 +32,8 @@ abstract class Api extends ParseParams
      * @var array 接口返回数据数组
      */
     protected $return = [];
+    /** @var  Response */
+    private $response;
 
     /**
      * @desc   init 初始化
@@ -114,7 +116,7 @@ abstract class Api extends ParseParams
      * @author chenmingming
      *
      * @param string $key   key
-     * @param mixed $value value
+     * @param mixed  $value value
      *
      * @return $this
      */
@@ -148,12 +150,12 @@ abstract class Api extends ParseParams
     final private function send()
     {
         $this->beforeResponse();
-        $response = Response::create();
-        $response->options([self::OPT_FORMAT_TO_STRING => $this->options[self::OPT_FORMAT_TO_STRING]]);
+        $this->response = Response::create();
+        $this->response->options([self::OPT_FORMAT_TO_STRING => $this->options[self::OPT_FORMAT_TO_STRING]]);
         foreach ($this->return as $key => $value) {
-            $response->set($key, $value);
+            $this->response->set($key, $value);
         }
-        $response->send();
+        $this->response->send();
         $this->afterResponse();
     }
 
@@ -202,6 +204,16 @@ abstract class Api extends ParseParams
     public function getOption($key)
     {
         return $this->options[$key];
+    }
+
+    /**
+     * @desc   getResponse
+     * @author chenmingming
+     * @return Response
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
 
 }
