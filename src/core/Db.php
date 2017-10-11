@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManager;
 use mmapi\cache\driver\Memcached;
 use mmapi\cache\driver\Redis;
 use mmapi\model\InvalidFieldValue;
+use mmapi\model\MXmlDriver;
 
 class Db
 {
@@ -69,7 +70,7 @@ class Db
         }
         array_push($this->options['path'], dirname(__DIR__) . '/model/xml');
 
-        $config->setMetadataDriverImpl(new XmlDriver($this->options['path']));
+        $config->setMetadataDriverImpl(new MXmlDriver($this->options['path']));
         $config->setSQLLogger(new SqlLog());
         try {
             $this->entityManager = EntityManager::create($this->options['conn'], $config);
